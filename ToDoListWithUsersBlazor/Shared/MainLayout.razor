@@ -1,0 +1,66 @@
+﻿@using DataLibrary.Enums;
+@using DataLibrary.Models;
+@using ToDoListWithUsersApi;
+@using ToDoListWithUsersBlazor.Services;
+@inject NavigationManager navigationManager;
+@inject UserServiceUi userService;
+@inherits LayoutComponentBase;
+
+<PageTitle>ToDoListWithUsersBlazor</PageTitle>
+
+<div class="page">
+    <!--<div class="sidebar">
+        <NavMenu />
+    </div>-->
+
+    <main>
+        <div class="top-row px-4 justify-content-between">
+            <a href="" @onclick="@(() => navigationManager.NavigateTo("/"))" class="btn text-xxl text-warning"><h4 class="mb-0">To Do List</h4></a>
+            <div>
+                @if (User == null)
+                {
+                    <a href="" @onclick="@(() => navigationManager.NavigateTo("/login"))" @onclick:preventDefault class="btn btn-warning">Login</a>
+                    <a href="" @onclick="@(() => navigationManager.NavigateTo("/signup"))" @onclick:preventDefault class="btn btn-secondary">Sign Up</a>
+                }
+                else
+                {
+                    if (User.Permission != PermissionLevel.User)
+                    {
+                        <a href="" @onclick="@(() => navigationManager.NavigateTo("/Manage"))" class="btn btn-outline-warning">Manage other users</a>
+                    }
+
+                    <a href="" @onclick="@Logout" @onclick:preventDefault class="btn btn-warning">Log Out</a>
+                    <a href="" @onclick="@(() => navigationManager.NavigateTo("/settings"))" @onclick:preventDefault class="btn btn-secondary">User settings</a>
+                }
+            </div>
+        </div>
+
+        <article class="content px-4">
+            @Body
+        </article>
+    </main>
+</div>
+
+@code {
+    public UserModel? User { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            User = await userService.GetUser();
+        }
+        catch (Exception)
+        {
+            User = null;
+        }
+    }
+
+    public async void Logout()
+    {
+        await userService.Logout();
+        User = null;
+        navigationManager.NavigateTo("/", true);
+    }
+}
+

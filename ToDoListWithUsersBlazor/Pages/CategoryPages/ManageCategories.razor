@@ -1,0 +1,55 @@
+﻿@page "/manage-categories"
+
+@inject TaskListServiceUi listService
+@inject CategoryServiceUi categoryService
+@using System.Text;
+@using System.Text.Json;
+@using DataLibrary.Models;
+@using ToDoListWithUsersBlazor.Services;
+@inject NavigationManager navigationManager
+
+@if (Categories != null)
+{
+    <h3>Manage Categories</h3>
+
+    <CreateCategory OnCategoryCreated="@CategoryCreated"></CreateCategory>
+
+    <hr class="opacity-75 rounded-pill" style="height: 6px;" />
+
+    <UserCategories Categories="@Categories" OnCategoryDeleted="CategoryDeleted"></UserCategories>
+
+    <button type="reset" @onclick="@(() => navigationManager.NavigateTo("/"))" @onclick:preventDefault class="btn btn-secondary">Back</button>
+}
+
+
+
+
+@code {
+    public List<CategoryModel>? Categories { get; set; }
+    public CategoryModel TempCategory { get; set; } = new();
+    public string ErrorMessage { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            Categories = await categoryService.GetCategories();
+        }
+        catch (Exception)
+        {
+            Categories = null;
+        }
+    }
+
+    protected async Task CategoryCreated()
+    {
+        Categories = await categoryService.GetCategories();
+        StateHasChanged();
+    }
+
+    protected async Task CategoryDeleted()
+    {
+        Categories = await categoryService.GetCategories();
+        StateHasChanged();
+    }
+}

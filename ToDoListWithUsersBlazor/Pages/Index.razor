@@ -1,0 +1,37 @@
+﻿@page "/"
+
+@inject UserServiceUi userService
+@using DataLibrary.Enums;
+@using DataLibrary.Models;
+@using ToDoListWithUsersBlazor.Pages.UserPages
+@using ToDoListWithUsersBlazor.Services;
+@inject NavigationManager navigationManager
+
+<PageTitle>Home</PageTitle>
+
+@if (User == null)
+{
+    <h2 class="text-center">Login or create a user to create your own to do list</h2>
+}
+else
+{
+    <CurrentUser User="@User"></CurrentUser>
+}
+
+@code {
+    public UserModel? User { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            User = await userService.GetUser();
+        }
+        catch (Exception)
+        {
+            User = null;
+        }
+    }
+
+
+}

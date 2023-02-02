@@ -1,0 +1,172 @@
+﻿@using DataLibrary.Enums;
+@using DataLibrary.Models;
+@using ToDoListWithUsersApi;
+@using ToDoListWithUsersBlazor.Services;
+@inject TaskServiceUi taskService
+@inject SubTaskServiceUi subTaskService
+@inject NavigationManager navigationManager;
+
+<div class="mt-3">
+    @if (SubTasks.Count == 0)
+    {
+        <ul>
+            <li>No tasks</li>
+        </ul>
+    }
+    else
+    {
+        <div class="d-flex flex-wrap flex-column gap-2">
+            <Virtualize Context="subTask" Items="SubTasks">
+                <div class="d-flex align-self-center">
+                    <div class="text-white p-2 mx-2 border-5 rounded-3 hover d-flex flex-column flex-wrap justify-content-between" style="min-width: 500px; min-height: 90px; ">
+
+                        @if ((!ConfirmEditSubTask && !ConfirmDeleteSubTask) || subTask.Id != TempSubTask.Id)
+                        {
+                            <div class="mb-0 h4 d-flex flex-column">
+                                <div class="d-flex justify-content-between">
+                                    <span class="h4 mb-0">@subTask?.Title.ToUpper()</span>
+
+                                </div>
+                                <span class="h6 opacity-75">@subTask?.Description</span>
+
+                            </div>
+                            <hr class="bg-warning mx-2 my-1" />
+                            <div class="gap-2">
+                            </div>
+                        }
+                        else if (subTask.Id == TempSubTask.Id && ConfirmDeleteSubTask)
+                        {
+                            <div class="text-center mb-0">Are you sure?</div>
+                            <hr class="bg-black mx-2 my-1" />
+                            <div>
+                                <button @onclick="() => Delete(subTask)" class="btn btn-outline-success oi oi-check" style="height: 30px; width: calc(50% - 4px)"></button>
+                                <button type="reset" @onclick="() => ToggleDelete(subTask)" @onclick:preventDefault class="btn btn-outline-danger oi oi-x" style="height: 30px; width: calc(50% - 4px)"></button>
+                            </div>
+                        }
+                        else if (subTask.Id == TempSubTask.Id && ConfirmEditSubTask)
+                        {
+                            <p class="text-danger">@EditErrorMessage</p>
+                            <EditForm Model="subTask" OnSubmit="() => Edit(subTask)">
+                                <DataAnnotationsValidator />
+                                <div class="form-group row">
+                                    <div class="form-group col">
+                                        <label for="title">Title</label>
+                                        <InputText placeholder="Title..." id="title" @bind-Value="subTask.Title" class="form-control" />
+                                    </div>
+                                    <div class="form-group col">
+                                        <label for="description">Description</label>
+                                        <InputText placeholder="Description..." id="description" @bind-Value="subTask.Description" class="form-control" />
+                                        <ValidationMessage For="@(() => subTask.Description)" />
+                                    </div>
+                                    
+                            </div>
+
+                            <br />
+
+                            <div class="form-group row mt-2">
+                                <div class="form-group col">
+                                    <button type="submit" class="btn btn-outline-success oi oi-pencil" style="height: 30px; width: calc(50% - 4px)"></button>
+                                    <button type="reset" @onclick="() => ToggleEdit(subTask)" @onclick:preventDefault class="btn btn-outline-danger oi oi-x" style="height: 30px; width: calc(50% - 4px)"></button>
+                                </div>
+                            </div>
+                            <br />
+                        </EditForm>
+                        }
+                    </div>
+                    <div class="d-flex flex-column gap-2">
+                        <button @onclick="() => ToggleEdit(subTask)" class="btn btn-secondary oi oi-pencil" style="height: 40px; width: 40px"></button>
+                        <button @onclick="() => ToggleDelete(subTask)" class="btn btn-outline-danger oi oi-trash" style="height: 40px; width: 40px"></button>
+                    </div>
+                </div>
+            </Virtualize>
+        </div>
+    }
+</div>
+
+<style>
+    .hover {
+        background-color: rgb(0, 100, 50);
+        opacity: 0.8;
+        -webkit-transition: background-color 0.2s ease-in-out;
+        -moz-transition: background-color 0.2s ease-in-out;
+        transition: background-color 0.2s ease-in-out;
+    }
+
+</style>
+
+@code {
+    [Parameter]
+    public List<SubTaskModel> SubTasks { get; set; }
+    [Parameter]
+    public TaskModel Task { get; set; }
+
+    public SubTaskModel TempSubTask { get; set; } = new()
+        {
+            Id = Guid.Empty
+        };
+
+    public string EditErrorMessage { get; set; } = "";
+    public bool ConfirmDeleteSubTask { get; set; } = false;
+    public bool ConfirmEditSubTask { get; set; } = false;
+
+    public void ToggleDelete(SubTaskModel subTask)
+    {
+        if (TempSubTask.Id != subTask.Id)
+        {
+            TempSubTask.Id = subTask.Id;
+            ConfirmEditSubTask = false;
+            ConfirmDeleteSubTask = true;
+            return;
+        }
+
+        ConfirmDeleteSubTask = !ConfirmDeleteSubTask;
+        ConfirmEditSubTask = false;
+        TempSubTask.Id = subTask.Id;
+    }
+
+    public void ToggleEdit(SubTaskModel subTask)
+    {
+        if (TempSubTask.Id != subTask.Id)
+        {
+            TempSubTask.Id = subTask.Id;
+            ConfirmDeleteSubTask = false;
+            ConfirmEditSubTask = true;
+            return;
+        }
+
+        ConfirmEditSubTask = !ConfirmEditSubTask;
+        ConfirmDeleteSubTask = false;
+        EditErrorMessage = "";
+        TempSubTask.Id = subTask.Id;
+    }
+
+    public async Task Delete(SubTaskModel subTask)
+    {
+        try
+        {
+            await subTaskService.DeleteSubTask(subTask);
+            SubTasks.Remove(subTask);
+            ConfirmDeleteSubTask = false;
+        }
+        catch (Exception)
+        {
+            return;
+        }
+    }
+
+    public async Task Edit(SubTaskModel subTask)
+    {
+        try
+        {
+            await subTaskService.EditSubTask(subTask);
+            SubTasks = await subTaskService.GetSubTasks();
+            ConfirmEditSubTask = false;
+            EditErrorMessage = "";
+        }
+        catch (Exception)
+        {
+            EditErrorMessage = "User already has a list with this name.";
+            return;
+        }
+    }
+}

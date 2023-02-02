@@ -1,0 +1,112 @@
+﻿@page "/settings"
+
+@using DataLibrary.Models;
+@using ToDoListWithUsersBlazor.Services;
+@inject UserServiceUi userService;
+@inject NavigationManager navigationManager;
+
+@if (User != null)
+{
+    <h3>Settings for '@User.Username'</h3>
+
+    <p class="text-danger">@ErrorMessage</p>
+    <EditForm Model="@User" OnSubmit="@Edit">
+        <DataAnnotationsValidator />
+        <div class="form-group row">
+            <div class="form-group col">
+                <label for="username">Username</label>
+                <InputText id="username" @bind-Value="User.Username" DisplayName="Username" class="form-control" />
+                <ValidationMessage For="@(() => User.Username)" />
+            </div>
+            <div class="form-group col">
+                <label for="email">Email</label>
+                <InputText id="email" @bind-Value="User.Email" class="form-control" />
+                <ValidationMessage For="@(() => User.Email)" />
+            </div>
+        </div>
+
+        <br />
+
+        <div class="form-group row">
+            <div class="form-group col">
+                <label for="firstName">First Name</label>
+                <InputText id="firstName" @bind-Value="User.FirstName" class="form-control" />
+                <ValidationMessage For="@(() => User.FirstName)" />
+            </div>
+            <div class="form-group col">
+                <label for="lastName">Last Name</label>
+                <InputText id="lastName" @bind-Value="User.LastName" class="form-control" />
+                <ValidationMessage For="@(() => User.LastName)" />
+            </div>
+        </div>
+
+        <br />
+
+        <div class="form-group row">
+            <div class="form-group col">
+                <label for="age">Age</label>
+                <InputNumber id="age" @bind-Value="User.Age" class="form-control" />
+                <ValidationMessage For="@(() => User.Age)" />
+            </div>
+        </div>
+
+        <br />
+
+        <div class="form-group row">
+            <div class="form-group col">
+                <label>Gender</label>
+                <InputText id="gender" @bind-Value="User.Gender" class="form-control" />
+                <ValidationMessage For="@(() => User.Gender)" />
+            </div>
+            <div class="form-group col">
+                <label for="adress">Adress</label>
+                <InputText id="adress" @bind-Value="User.Adress" class="form-control" />
+                <ValidationMessage For="@(() => User.Adress)" />
+            </div>
+        </div>
+
+        <br />
+
+        <div class="form-group row">
+            <div class="form-group col">
+                <button class="btn btn-warning">Edit user</button>
+
+                <button type="reset" @onclick="@(() => navigationManager.NavigateTo("/"))" @onclick:preventDefault class="btn btn-secondary">Cancel</button>
+                <button type="reset" @onclick="@(() => navigationManager.NavigateTo("/change-password"))" @onclick:preventDefault class="btn btn-outline-warning">Change Password</button>
+                <button type="reset" @onclick="@(() => navigationManager.NavigateTo("/delete-user"))" @onclick:preventDefault class="btn btn-outline-danger">Delete User</button>
+            </div>
+        </div>
+    </EditForm>
+}
+
+@code {
+    public UserModel? User { get; set; }
+    public string ErrorMessage { get; set; } = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            User = await userService.GetUser();
+        }
+        catch (Exception)
+        {
+            User = null;
+        }
+    }
+
+    public async Task Edit()
+    {
+        try
+        {
+            User = await userService.EditUser(User);
+
+        }
+        catch (Exception)
+        {
+            ErrorMessage = "Username already exists.";
+            return;
+        }
+        navigationManager.NavigateTo("/settings", true);
+    }
+}

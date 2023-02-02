@@ -1,0 +1,70 @@
+﻿@page "/create-sub-task"
+
+@inject SubTaskServiceUi subTaskService
+@using System.Text;
+@using System.Text.Json;
+@using DataLibrary.Enums;
+@using DataLibrary.Models;
+@using ToDoListWithUsersBlazor.Services;
+@inject NavigationManager navigationManager
+
+<div class="d-flex justify-content-between">
+    <h3>Create a new Sub Task</h3>
+
+    <a href="" @onclick="@(() => navigationManager.NavigateTo("/list"))" @onclick:preventDefault class="btn btn-outline-warning">Back</a>
+</div>
+
+<p class="text-danger">@ErrorMessage</p>
+<EditForm Model="@NewSubTask" OnValidSubmit="@Create">
+    <DataAnnotationsValidator />
+    <div class="form-group row">
+        <div class="form-group col">
+            <InputText placeholder="Title..." id="title" @bind-Value="NewSubTask.Title" class="form-control" />
+            <ValidationMessage For="@(() => NewSubTask.Title)" />
+        </div>
+
+        <div class="form-group col">
+            <InputText placeholder="Description..." id="description" @bind-Value="NewSubTask.Description" class="form-control" />
+            <ValidationMessage For="@(() => NewSubTask.Description)" />
+        </div>
+    </div>
+
+    <br />
+
+    <div class="form-group row">
+        
+    </div>
+
+    <br />
+
+    <div class="form-group row">
+        <div class="form-group col">
+            <button type="submit" class="btn btn-success oi oi-plus" style="height: 40px; width: 40px"></button>
+            <button type="reset" class="btn btn-outline-danger oi oi-x" style="height: 40px; width: 40px"></button>
+        </div>
+    </div>
+</EditForm>
+
+@code {
+    [Parameter]
+    public EventCallback<List<TaskListModel>> OnSubTaskCreated { get; set; }
+    public SubTaskModel NewSubTask { get; set; } = new();
+    public string ErrorMessage { get; set; } = "";
+
+
+    public async Task Create()
+    {
+        try
+        {
+            await subTaskService.CreateSubTask(NewSubTask);
+        }
+        catch (Exception)
+        {
+            ErrorMessage = "Sub Task already exists in this task.";
+            return;
+        }
+        NewSubTask = new();
+        await OnSubTaskCreated.InvokeAsync();
+    }
+
+}

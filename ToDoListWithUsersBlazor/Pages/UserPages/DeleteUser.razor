@@ -1,0 +1,69 @@
+﻿@page "/delete-user"
+
+@using DataLibrary.Models;
+@using ToDoListWithUsersBlazor.Services;
+@inject UserServiceUi userService;
+@inject NavigationManager navigationManager;
+
+@if (User != null)
+{
+    <h3>Delete user '@User.Username'</h3>
+
+    <p class="text-danger">@ErrorMessage</p>
+    <EditForm Model="@User" OnSubmit="@Delete">
+        <div class="form-group row">
+            <div class="form-group col">
+                <label for="delete">Type "DELETE" to delete user. This can not be undone</label>
+                <InputText id="delete" @bind-Value="ConfirmDelete" class="form-control" />
+            </div>
+        </div>
+
+        <br />
+
+        <div class="form-group row">
+            <div class="form-group col">
+                <button class="btn btn-warning">Delete user</button>
+                <button type="reset" @onclick="@(() => navigationManager.NavigateTo("/settings"))" @onclick:preventDefault class="btn btn-secondary">Cancel</button>
+            </div>
+        </div>
+    </EditForm>
+}
+
+@code {
+    public UserModel? User { get; set; } = new();
+    public string ErrorMessage { get; set; } = "";
+    public string ConfirmDelete { get; set; } = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            User = await userService.GetUser();
+        }
+        catch (Exception)
+        {
+            User = null;
+        }
+    }
+
+    public async Task Delete()
+    {
+        try
+        {
+            if (ConfirmDelete != "DELETE")
+            {
+                ErrorMessage = "Incorrect input. Type 'DELETE' in the field below";
+                return;
+            }
+
+            await userService.DeleteUser(User);
+
+        }
+        catch (Exception)
+        {
+            ErrorMessage = "Something went wrong with deleting the user.";
+            return;
+        }
+        navigationManager.NavigateTo("/", true);
+    }
+}

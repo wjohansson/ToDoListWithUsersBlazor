@@ -1,0 +1,51 @@
+﻿@inject TaskListServiceUi listService
+@inject CategoryServiceUi categoryService
+@using System.Text;
+@using System.Text.Json;
+@using DataLibrary.Models;
+@using ToDoListWithUsersBlazor.Services;
+
+<p class="text-danger">@ErrorMessage</p>
+<EditForm Model="@Category" OnValidSubmit="@Create">
+    <DataAnnotationsValidator />
+    <div class="form-group row">
+        <div class="form-group col">
+            <label for="title">Title</label>
+            <InputText id="title" @bind-Value="Category.Title" class="form-control" />
+            <ValidationMessage For="@(() => Category.Title)" />
+        </div>
+    </div>
+
+    <br />
+
+    <div class="form-group row">
+        <div class="form-group col">
+            <button type="submit" class="btn btn-success oi oi-plus" style="height: 40px; width: 40px"></button>
+            <button type="reset" class="btn btn-outline-danger oi oi-trash" style="height: 40px; width: 40px"></button>
+        </div>
+    </div>
+</EditForm>
+
+@code {
+    [Parameter]
+    public EventCallback<List<TaskListModel>> OnCategoryCreated { get; set; }
+
+    public CategoryModel Category { get; set; } = new();
+    public string ErrorMessage { get; set; } = "";
+
+    public async Task Create()
+    {
+        try
+        {
+            await categoryService.CreateCategory(Category);
+        }
+        catch (Exception)
+        {
+            ErrorMessage = "Category already exists.";
+            return;
+        }
+        Category = new();
+        await OnCategoryCreated.InvokeAsync();
+    }
+
+}

@@ -1,0 +1,35 @@
+﻿@using DataLibrary.Enums;
+@using DataLibrary.Models;
+@using ToDoListWithUsersBlazor.Services;
+@inject UserServiceUi userService
+@inject TaskListServiceUi listService
+
+<h3 for="sort" class="text-white ">Sort</h3>
+
+
+<EditForm Model="User">
+    <div class="form-group col" style="width: 200px;">
+        <InputSelect id="sort" @bind-Value="User.SortLists" class="form-control">
+            @foreach (var sort in Enum.GetValues(typeof(SortLists)))
+            {
+                <option @onclick="@UpdateSort" value="@sort">@sort</option>
+
+            }
+        </InputSelect>
+
+    </div>
+</EditForm>
+
+@code {
+    [Parameter]
+    public EventCallback<List<TaskListModel>> OnSortChanged{ get; set; }
+    [Parameter]
+    public UserModel User { get; set; }
+    public SortLists SortLists { get; set; }
+
+    public async Task UpdateSort()
+    {
+        User = await userService.UpdateSort(User);
+        await OnSortChanged.InvokeAsync();
+    }
+}

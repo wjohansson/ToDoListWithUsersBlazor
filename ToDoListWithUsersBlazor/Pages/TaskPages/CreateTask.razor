@@ -1,0 +1,80 @@
+﻿@page "/create-task"
+
+@inject TaskServiceUi taskService
+@using System.Text;
+@using System.Text.Json;
+@using DataLibrary.Enums;
+@using DataLibrary.Models;
+@using ToDoListWithUsersBlazor.Services;
+@inject NavigationManager navigationManager
+
+<div class="d-flex justify-content-between">
+    <h3>Create a new Task</h3>
+
+    <a href="" @onclick="@(() => navigationManager.NavigateTo("/"))" @onclick:preventDefault class="btn btn-outline-secondary">Back</a>
+</div>
+
+<p class="text-danger">@ErrorMessage</p>
+<EditForm Model="@NewTask" OnValidSubmit="@Create">
+    <DataAnnotationsValidator />
+    <div class="form-group row">
+        <div class="form-group col">
+            <InputText placeholder="Title..." id="title" @bind-Value="NewTask.Title" class="form-control" />
+            <ValidationMessage For="@(() => NewTask.Title)" />
+        </div>
+
+        
+        <div class="form-group col">
+            <InputSelect id="priority" @bind-Value="NewTask.Priority" class="form-control">
+                <option value="">Priority...</option>
+                @foreach (var sort in Enum.GetValues(typeof(Priority)))
+                {
+                    <option value="@sort">@sort</option>
+                }
+            </InputSelect>
+            <ValidationMessage For="@(() => NewTask.Priority)" />
+        </div>
+    </div>
+
+    <br />
+
+    <div class="form-group row">
+        <div class="form-group col">
+            <InputText placeholder="Description..." id="description" @bind-Value="NewTask.Description" class="form-control" />
+            <ValidationMessage For="@(() => NewTask.Description)" />
+        </div>
+    </div>
+
+    <br />
+
+    <div class="form-group row">
+        <div class="form-group col">
+            <button type="submit" class="btn btn-success oi oi-plus" style="height: 40px; width: 40px"></button>
+            <button type="reset" class="btn btn-outline-danger oi oi-x" style="height: 40px; width: 40px"></button>
+        </div>
+    </div>
+</EditForm>
+
+@code {
+    [Parameter]
+    public EventCallback<List<TaskListModel>> OnTaskCreated { get; set; }
+    public TaskModel NewTask { get; set; } = new();
+    public string ErrorMessage { get; set; } = "";
+
+
+    public async Task Create()
+    {
+        try
+        {
+            await taskService.CreateTask(NewTask);
+        }
+        catch (Exception)
+        {
+            ErrorMessage = "Task already exists in this list.";
+            return;
+        }
+        NewTask = new();
+        await OnTaskCreated.InvokeAsync();
+    }
+
+}

@@ -1,0 +1,95 @@
+﻿@inject TaskListServiceUi listService
+@inject CategoryServiceUi categoryService
+@using System.Text;
+@using System.Text.Json;
+@using DataLibrary.Models;
+@using ToDoListWithUsersBlazor.Services;
+@inject NavigationManager navigationManager
+
+<div class="d-flex flex-wrap">
+    @foreach (CategoryModel category in Categories)
+    {
+        @if (category.Title != "No category")
+        {
+            <div class="p-2 m-2 border-5 bg-warning bg-opacity-25 rounded-3 d-flex flex-column" style="width: calc(20% - 16px); min-height: 50px; ">
+                @if (!ConfirmDeleteCategory || TempCategory.Id != category.Id)
+                {
+                    <div class="d-flex w-100 justify-content-between">
+                        <h4 class="mb-0 align-self-center" style="height: fit-content">@category.Title</h4>
+                        <button @onclick="() => ToggleDelete(category)" class="btn btn-secondary oi oi-trash" style="height: 40px; width: 40px"></button>
+                    </div>
+                }
+                else
+                {
+                    <div class="d-flex w-100 justify-content-between">
+                        <h4 class="mb-0 align-self-center" style="height: fit-content">Are you sure?</h4>
+                        <button @onclick="() => Delete(category)" class="btn btn-outline-success oi oi-check" style="height: 40px; width: 40px"></button>
+                        <button @onclick="() => ToggleDelete(category)" class="btn btn-outline-danger oi oi-x" style="height: 40px; width: 40px"></button>
+                    </div>
+                }
+
+                <hr class="opacity-75 rounded-pill" style="height: 2px;" />
+
+
+                @if (category.TaskLists.Count != 0)
+                {
+                    <div>
+                        <h6>This category lists</h6>
+                        <ul>
+                            @foreach (var list in category.TaskLists)
+                            {
+                                <li>@list.Title</li>
+                            }
+                        </ul>
+                    </div>
+                }
+                else
+                {
+                    <h6>No lists in this category</h6>
+                }
+            </div>
+
+
+        }
+    }
+</div>
+
+@code {
+    [Parameter]
+    public EventCallback<List<TaskListModel>> OnCategoryDeleted { get; set; }
+
+    [Parameter]
+    public List<CategoryModel>? Categories { get; set; }
+
+    public bool ConfirmDeleteCategory { get; set; } = false;
+    public CategoryModel TempCategory { get; set; } = new();
+    public string ErrorMessage { get; set; } = "";
+
+    public async void Delete(CategoryModel category)
+    {
+        try
+        {
+            await categoryService.DeleteCategory(category);
+        }
+        catch (Exception)
+        {
+            ErrorMessage = "Something went wrong with deleting the category.";
+            return;
+        }
+        await OnCategoryDeleted.InvokeAsync();
+    }
+
+    public void ToggleDelete(CategoryModel category)
+    {
+        if (TempCategory.Id != category.Id)
+        {
+            TempCategory.Id = category.Id;
+            ConfirmDeleteCategory = true;
+            return;
+        }
+
+        ConfirmDeleteCategory = !ConfirmDeleteCategory;
+        //StateHasChanged();
+    }
+
+}

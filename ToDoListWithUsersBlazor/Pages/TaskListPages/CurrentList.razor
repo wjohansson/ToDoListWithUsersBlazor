@@ -1,0 +1,80 @@
+﻿@page "/list"
+
+@using DataLibrary.Enums;
+@using DataLibrary.Models;
+@using ToDoListWithUsersBlazor.Pages.TaskPages
+@using ToDoListWithUsersBlazor.Services;
+@inject TaskListServiceUi listService;
+@inject TaskServiceUi taskService;
+@inject UserServiceUi userService;
+@inject NavigationManager navigationManager;
+
+
+
+@if (ThisList != null || Tasks != null || User != null)
+{
+    <div class="w-100 d-flex flex-column">
+        <p class="text-center text-black-50 text-decoration-underline mb-0">Category: @User.Categories.Single(x => x.Id == ThisList.CategoryId).Title</p>
+
+        <h3 class="text-center">List: @ThisList.Title</h3>
+
+        <div class="p-2 m-2 border-5 bg-opacity-25 rounded-3 d-flex flex-column flex-wrap justify-content-between align-self-center" style="width: 700px; height: stretch; background-color: gold">
+            <CreateTask OnTaskCreated="@TaskCreated"></CreateTask>
+            <hr class="opacity-75 rounded-pill"/>
+            <SortListTasks ThisList="@ThisList" OnSortChanged="@SortChanged"></SortListTasks>
+            <hr class="opacity-75 rounded-pill" />
+            <ListTasks Tasks="@Tasks" User="@User"></ListTasks>
+        </div>
+    </div>
+
+    <p class="text-danger">@ErrorMessage</p>
+}
+
+<style>
+    .task {
+        background-color: darkslategray;
+        opacity: 0.8;
+        -webkit-transition: background-color 0.2s ease-in-out;
+        -moz-transition: background-color 0.2s ease-in-out;
+        transition: background-color 0.2s ease-in-out;
+    }
+
+        .task:hover {
+            background-color: darkcyan;
+            cursor: pointer;
+        }
+
+</style>
+
+@code {
+    public TaskListModel? ThisList { get; set; }
+    public List<TaskModel>? Tasks { get; set; }
+    public UserModel? User { get; set; }
+    public string ErrorMessage { get; set; } = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            ThisList = await listService.GetList(CurrentActive.Id["ListId"]);
+            Tasks = await taskService.GetTasks();
+            User = await userService.GetUser();
+        }
+        catch (Exception)
+        {
+            ThisList = null;
+        }
+    }
+
+    public async Task TaskCreated()
+    {
+        Tasks = await taskService.GetTasks();
+        ThisList = await listService.GetList(CurrentActive.Id["ListId"]);
+    }
+
+    public async Task SortChanged()
+    {
+        Tasks = await taskService.GetTasks();
+        ThisList = await listService.GetList(CurrentActive.Id["ListId"]);
+    }
+}

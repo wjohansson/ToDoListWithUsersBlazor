@@ -1,0 +1,100 @@
+﻿@page "/create-list"
+
+@inject TaskListServiceUi listService
+@inject CategoryServiceUi categoryService
+@inject UserServiceUi userService
+@using System.Text;
+@using System.Text.Json;
+@using DataLibrary.Models;
+@using ToDoListWithUsersBlazor.Pages.UserPages;
+@using ToDoListWithUsersBlazor.Services;
+@inject NavigationManager navigationManager;
+
+<div class="d-flex justify-content-between">
+    <h3 class="text-white">Create a new list</h3>
+</div>
+
+<p class="text-danger">@ErrorMessage</p>
+<EditForm Model="@TaskList" OnValidSubmit="@Create">
+    <DataAnnotationsValidator />
+    <div class="d-flex flex-column w-50">
+        <div class="form-group row d-flex">
+            <div class="form-group col">
+                <InputText placeholder="Title..." id="title" @bind-Value="TaskList.Title" class="form-control" />
+                <ValidationMessage For="@(() => TaskList.Title)" />
+            </div>
+
+            <div class="form-group col">
+                <InputSelect id="category" @bind-Value="TaskList.CategoryId" class="form-control">
+                    @if (User != null)
+                    {
+                        <option value="@User.Categories.First(x => x.Title == "No category")" class="text-opacity-75">No category</option>
+                        @foreach (CategoryModel category in User.Categories)
+                        {
+                            @if (category.Title != "No category")
+                            {
+                                <option value="@category.Id">@category.Title</option>
+                            }
+                        }
+                    }
+                </InputSelect>
+            </div>
+
+        </div>
+
+        <div class="form-group row mt-3">
+            <div class="form-group col d-flex gap-2">
+                <button type="submit" class="btn btn-warning oi oi-plus" style="height: 40px; width: 40px"></button>
+                <button type="reset" class="btn btn-outline-danger oi oi-trash" style="height: 40px; width: 40px"></button>
+                <a href="" @onclick="@(() => navigationManager.NavigateTo("/manage-categories"))" @onclick:preventDefault class="btn btn-warning">Manage Categories</a>
+            </div>
+        </div>
+    </div>
+</EditForm>
+
+@code {
+    [Parameter]
+    public EventCallback<List<TaskListModel>> OnListCreated { get; set; }
+
+    [Parameter]
+    public UserModel? User { get; set; }
+
+    public TaskListModel TaskList { get; set; } = new();
+
+    //public List<CategoryModel>? Categories { get; set; }
+
+    public string CategoryTitle { get; set; } = "";
+
+    public string ErrorMessage { get; set; } = "";
+
+    //protected override async Task OnInitializedAsync()
+    //{
+    //    try
+    //    {
+    //        Categories = await categoryService.GetCategories();
+    //    }
+    //    catch (Exception)
+    //    {
+    //        Categories = null;
+    //    }
+    //}
+
+    public async Task Create()
+    {
+        try
+        {
+            await listService.CreateList(TaskList);
+
+            TaskList = new TaskListModel();
+            CategoryTitle = "";
+            ErrorMessage = "";
+        }
+        catch (Exception)
+        {
+            ErrorMessage = "User already has a list with this name";
+            return;
+        }
+        await OnListCreated.InvokeAsync();
+    }
+
+}

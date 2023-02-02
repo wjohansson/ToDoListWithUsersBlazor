@@ -1,0 +1,240 @@
+﻿@page "/Manage"
+@inject UserServiceUi userService
+@using DataLibrary.Enums;
+@using DataLibrary.Models;
+@using ToDoListWithUsersBlazor.Pages.UserPages
+@using ToDoListWithUsersBlazor.Services;
+@inject NavigationManager navigationManager
+
+<PageTitle>Manager Functions</PageTitle>
+
+@if (CurrentUser == null || Users == null)
+{
+    <p>You dont have access to this page</p>
+}
+else
+{
+    <h2>Your permission: @CurrentUser.Permission.Value</h2>
+    <h3 class="text-decoration-underline mt-5">Users you manage:</h3>
+
+    <p class="text-danger">@ErrorMessage</p>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Username</th>
+                <th>First name</th>
+                <th>Last name</th>
+                <th>Email</th>
+                <th>Age</th>
+                <th>Adress</th>
+                <th>Permission</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var user in Users)
+            {
+                if (user.Permission < CurrentUser.Permission)
+                {
+                    if (ExpandUser && CurrentActive.Id["UserId"] == user.Id)
+                    {
+                        <tr @onclick="() => EditUser(user.Id)" class="bg-warning">
+                            <td class="w-25">@user.Username</td>
+                            <td>@user.FirstName</td>
+                            <td>@user.LastName</td>
+                            <td>@user.Email</td>
+                            <td>@user.Age</td>
+                            <td>@user.Adress</td>
+                            <td>@user.Permission</td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="mb-5">
+                                    <div class="position-absolute d-flex gap-2 align-items-center w-75">
+                                        @if (!ConfirmDelete && !ConfirmPassword)
+                                        {
+                                            <button @onclick="@(() => Promote(user))" class="btn btn-outline-success oi oi-chevron-top  "><div class="font">Promote</div></button>
+                                            <button @onclick="@(() => Demote(user))" class="btn btn-outline-warning oi oi-chevron-bottom"><div class="font">Demote</div></button>
+                                            <button @onclick="@(() => ToggleConfirmDelete())" class="btn btn-danger oi oi-trash"><div class="font">Delete</div></button>
+                                            <button @onclick="@(() => ToggleConfirmPassword())" class="btn btn-dark oi oi-lock-locked"><div class="font">Change Password</div></button>
+                                        }
+                                        else if (ConfirmDelete)
+                                        {
+                                            <p class="danger mb-0">Are you sure?</p>
+                                            <button @onclick="@(() => Delete(user))" class="btn btn-success oi oi-check"></button>
+                                            <button @onclick="@(() => ToggleConfirmDelete())" class="btn btn-danger oi oi-x"></button>
+                                        }
+                                        else if (ConfirmPassword)
+                                        {
+                                            <div class="w-100">
+                                                <ChangeOtherPassword User="@user" OnToggleConfirmPassword="@ToggleConfirmPassword"></ChangeOtherPassword>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                    else
+                    {
+                        <tr @onclick="() => EditUser(user.Id)">
+                            <td class="w-25">@user.Username</td>
+                            <td>@user.FirstName</td>
+                            <td>@user.LastName</td>
+                            <td>@user.Email</td>
+                            <td>@user.Age</td>
+                            <td>@user.Adress</td>
+                            <td>@user.Permission</td>
+                        </tr>
+                    }
+                }
+            }
+        </tbody>
+    </table>
+
+    <br />
+
+    <h3 class="text-decoration-underline mt-5">Other Users you don't manage:</h3>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Username</th>
+                <th>First name</th>
+                <th>Last name</th>
+                <th>Email</th>
+                <th>Age</th>
+                <th>Adress</th>
+                <th>Permission</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var user in Users)
+            {
+                if (user.Permission >= CurrentUser.Permission && user.Id != CurrentUser.Id)
+                {
+                    <tr @onclick="() => EditUser(user.Id)">
+                        <td class="w-25">@user.Username</td>
+                        <td>@user.FirstName</td>
+                        <td>@user.LastName</td>
+                        <td>@user.Email</td>
+                        <td>@user.Age</td>
+                        <td>@user.Adress</td>
+                        <td>@user.Permission</td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+}
+
+<style>
+    .font {
+        font-family: Helvetica, Arial, sans-serif !important;
+    }
+</style>
+
+@code {
+    public UserModel? CurrentUser { get; set; }
+    public List<UserModel>? Users { get; set; }
+    public bool ExpandUser { get; set; } = false;
+    public string ErrorMessage { get; set; } = "";
+    public string Focus { get; set; } = "";
+    public bool ConfirmDelete { get; set; } = false;
+    public bool ConfirmPassword { get; set; } = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            CurrentUser = await userService.GetUser();
+            Users = await userService.GetUsers();
+        }
+        catch (Exception)
+        {
+            CurrentUser = null;
+            Users = null;
+        }
+    }
+
+    public void EditUser(Guid id)
+    {
+        if (ExpandUser == false)
+        {
+            CurrentActive.Id["UserId"] = id;
+            ExpandUser = !ExpandUser;
+        }
+        else if (ExpandUser == true && CurrentActive.Id["UserId"] != id)
+        {
+            CurrentActive.Id["UserId"] = id;
+
+        }
+        else
+        {
+            ExpandUser = false;
+        }
+
+        ConfirmDelete = false;
+        ConfirmPassword = false;
+    }
+
+    public async void Promote(UserModel user)
+    {
+        try
+        {
+            await userService.PromoteUser(user);
+            Users = await userService.GetUsers();
+            ErrorMessage = "";
+        }
+        catch (Exception)
+        {
+            ErrorMessage = "Can not promote from Admin";
+        }
+
+        StateHasChanged();
+    }
+
+    public async void Demote(UserModel user)
+    {
+        try
+        {
+            await userService.DemoteUser(user);
+            Users = await userService.GetUsers();
+        }
+        catch (Exception)
+        {
+            ErrorMessage = "Can not demote from User";
+        }
+
+        StateHasChanged();
+    }
+
+    public async void ToggleConfirmDelete()
+    {
+        ConfirmDelete = !ConfirmDelete;
+    }
+
+    public async void ToggleConfirmPassword()
+    {
+        ConfirmPassword = !ConfirmPassword;
+    }
+
+    //public async void ChangeUserPassword(UserModel user)
+    //{
+    //    await userService.ChangePassword(user);
+    //}
+
+    public async void Delete(UserModel user)
+    {
+        try
+        {
+            await userService.DeleteAnotherUser(user);
+            Users = await userService.GetUsers();
+        }
+        catch (Exception)
+        {
+            ErrorMessage = "Something went wrong with deleting the User";
+        }
+
+        StateHasChanged();
+    }
+}

@@ -1,0 +1,53 @@
+﻿@using DataLibrary.Enums;
+@using DataLibrary.Models;
+@using ToDoListWithUsersApi;
+@using ToDoListWithUsersBlazor.Pages.TaskListPages
+@using ToDoListWithUsersBlazor.Services;
+@inject UserServiceUi userService
+@inject TaskListServiceUi listService
+@inject CategoryServiceUi categoryService
+@inject NavigationManager navigationManager
+
+<h1>Welcome '@User.Username'</h1>
+
+@if (TaskLists != null && Categories != null)
+{
+
+    <div class="p-2 my-2 w-100 rounded-3 d-flex flex-column flex-wrap justify-content-between" style="background-color: darkslategray">
+        <CreateList OnListCreated="@ListCreated" User="@User"></CreateList>
+        <hr class="opacity-75 bg-warning rounded-pill"/>
+        <SortUserLists User="@User" OnSortChanged="@SortChanged"></SortUserLists>
+        <hr class="opacity-75 bg-warning rounded-pill" />
+        <UserLists TaskLists="@TaskLists" User="@User"></UserLists>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public UserModel? User { get; set; }
+    public List<TaskListModel?> TaskLists { get; set; }
+    public List<CategoryModel?> Categories { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            TaskLists = await listService.GetLists();
+            Categories = await categoryService.GetCategories();
+        }
+        catch (Exception)
+        {
+            User = null;
+        }
+    }
+
+    protected async Task ListCreated()
+    {
+        TaskLists = await listService.GetLists();
+    }
+
+    protected async Task SortChanged()
+    {
+        TaskLists = await listService.GetLists();
+    }
+}

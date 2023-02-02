@@ -1,0 +1,240 @@
+﻿@using DataLibrary.Enums;
+@using DataLibrary.Models;
+@using ToDoListWithUsersBlazor.Services;
+@inject TaskServiceUi taskService
+@inject TaskListServiceUi listService
+@inject NavigationManager navigationManager;
+
+<div class="mt-3">
+    @if (Tasks.Count == 0)
+    {
+        <ul>
+            <li>No tasks</li>
+        </ul>
+    }
+    else
+    {
+        <div class="d-flex flex-wrap flex-column gap-2">
+            <Virtualize Context="task" Items="Tasks">
+                <div class="d-flex align-self-center">
+                    <div class="form-check align-self-center">
+                        @if (task.Completed)
+                        {
+                            <input type="checkbox" @onclick="@(() => ToggleComplete(task))" @onclick:preventDefault class="form-check-input bg-opacity-75 bg-black align-self-center" style="width: 40px; height: 40px;" checked></input>
+                        }
+                        else
+                        {
+                            <input type="checkbox" @onclick="@(() => ToggleComplete(task))" @onclick:preventDefault class="form-check-input bg-opacity-75  align-self-center" style="width: 40px; height: 40px;"></input>
+                        }
+                    </div>
+
+                    <div @onpointerdown="() => GoToTask(task)" class="text-white p-2 mx-2 border-5 rounded-3 hover d-flex flex-column flex-wrap justify-content-between @((CheckOpacity(task)) ? "opacity-25" : "opacity-100")" style="min-width: 500px; min-height: 90px; ">
+
+                        @if ((!ConfirmEditTask && !ConfirmDeleteTask) || task.Id != TempTask.Id)
+                        {
+                            <div class="mb-0 h4 d-flex flex-column">
+                                <div class="d-flex justify-content-between">
+                                    <span class="h4 mb-0">@task?.Title.ToUpper()</span>
+                                    <span class="h6 text-warning">@task?.Priority.Value</span>
+
+                                </div>
+                                <span class="h6 opacity-75">@task?.Description</span>
+
+                            </div>
+                            <hr class="bg-warning mx-2 my-1" />
+                            <div class="gap-2">
+                            </div>
+                            <ul>
+                                <Virtualize Items="@task?.SubTasks">
+                                    <li>@context.Title</li>
+                                </Virtualize>
+                            </ul>
+                        }
+                        else if (task.Id == TempTask.Id && ConfirmDeleteTask)
+                        {
+                            <div class="text-center mb-0">Are you sure?</div>
+                            <hr class="bg-black mx-2 my-1" />
+                            <div>
+                                <button @onclick="() => Delete(task)" class="btn btn-outline-success oi oi-check" style="height: 30px; width: calc(50% - 4px)"></button>
+                                <button type="reset" @onclick="() => ToggleDelete(task)" @onclick:preventDefault class="btn btn-outline-danger oi oi-x" style="height: 30px; width: calc(50% - 4px)"></button>
+                            </div>
+                        }
+                        else if (task.Id == TempTask.Id && ConfirmEditTask)
+                        {
+                            <p class="text-danger">@EditErrorMessage</p>
+                            <EditForm Model="task" OnSubmit="() => Edit(task)">
+                                <DataAnnotationsValidator />
+                                <div class="form-group row">
+                                    <div class="form-group col">
+                                        <label for="title">Title</label>
+                                        <InputText placeholder="Title..." id="title" @bind-Value="task.Title" class="form-control" />
+                                    </div>
+
+                                    <div class="form-group col">
+                                        <label for="priority">Priority</label>
+                                        <InputSelect id="priority" @bind-Value="task.Priority" class="form-control">
+                                            @foreach (var sort in Enum.GetValues(typeof(Priority)))
+                                        {
+                                            <option value="@sort">@sort</option>
+                                        }
+                                    </InputSelect>
+                                    <ValidationMessage For="@(() => task.Priority)" />
+                                </div>
+                            </div>
+
+                            <br />
+
+                            <div class="form-group row">
+                                <div class="form-group col">
+                                    <label for="description">Description</label>
+                                    <InputText placeholder="Description..." id="description" @bind-Value="task.Description" class="form-control" />
+                                    <ValidationMessage For="@(() => task.Description)" />
+                                </div>
+                            </div>
+
+                            <div class="form-group row mt-2">
+                                <div class="form-group col">
+                                    <button type="submit" class="btn btn-outline-success oi oi-pencil" style="height: 30px; width: calc(50% - 4px)"></button>
+                                    <button type="reset" @onclick="() => ToggleEdit(task)" @onclick:preventDefault class="btn btn-outline-danger oi oi-x" style="height: 30px; width: calc(50% - 4px)"></button>
+                                </div>
+                            </div>
+                            <br />
+                        </EditForm>
+                        }
+                    </div>
+                    <div class="d-flex flex-column gap-2">
+                        <button @onclick="() => ToggleEdit(task)" class="btn btn-secondary oi oi-pencil" style="height: 40px; width: 40px"></button>
+                        <button @onclick="() => ToggleDelete(task)" class="btn btn-outline-danger oi oi-trash" style="height: 40px; width: 40px"></button>
+                    </div>
+                </div>
+            </Virtualize>
+        </div>
+    }
+</div>
+
+<style>
+    .hover {
+        background-color: rgb(100, 0, 0);
+        opacity: 0.8;
+        -webkit-transition: background-color 0.2s ease-in-out;
+        -moz-transition: background-color 0.2s ease-in-out;
+        transition: background-color 0.2s ease-in-out;
+    }
+
+        .hover:hover {
+            background-color: rgb(125, 0, 0);
+            cursor: pointer;
+        }
+
+</style>
+
+@code {
+    [Parameter]
+    public List<TaskModel> Tasks { get; set; }
+    [Parameter]
+    public UserModel User { get; set; }
+
+    public TaskModel TempTask { get; set; } = new()
+    {
+        Id = Guid.Empty
+    };
+
+    public string EditErrorMessage { get; set; } = "";
+    public bool ConfirmDeleteTask { get; set; } = false;
+    public bool ConfirmEditTask { get; set; } = false;
+
+    public void ToggleDelete(TaskModel task)
+    {
+        if (TempTask.Id != task.Id)
+        {
+            TempTask.Id = task.Id;
+            ConfirmEditTask = false;
+            ConfirmDeleteTask = true;
+            return;
+        }
+
+        ConfirmDeleteTask = !ConfirmDeleteTask;
+        ConfirmEditTask = false;
+        TempTask.Id = task.Id;
+    }
+
+    public void ToggleEdit(TaskModel task)
+    {
+        if (TempTask.Id != task.Id)
+        {
+            TempTask.Id = task.Id;
+            ConfirmDeleteTask = false;
+            ConfirmEditTask = true;
+            return;
+        }
+
+        ConfirmEditTask = !ConfirmEditTask;
+        ConfirmDeleteTask = false;
+        EditErrorMessage = "";
+        TempTask.Id = task.Id;
+    }
+
+    public async void ToggleComplete(TaskModel task)
+    {
+        await taskService.ToggleComplete(task);
+        Tasks = await taskService.GetTasks();
+        StateHasChanged();
+    }
+
+    public bool CheckOpacity(TaskModel task)
+    {
+        if (!task.Completed)
+        {
+            return false;
+        }
+        else if (task.Completed && (task.Id == TempTask.Id && (ConfirmDeleteTask || ConfirmEditTask)))
+        {
+            return false;
+        }
+        else
+        {
+            return true;
+        }
+    }
+
+    public void GoToTask(TaskModel task)
+    {
+        if ((ConfirmDeleteTask || ConfirmEditTask) && TempTask.Id == task.Id)
+        {
+            return;
+        }
+
+        CurrentActive.Id["TaskId"] = task.Id;
+        navigationManager.NavigateTo("/task", true);
+    }
+
+    public async Task Delete(TaskModel task)
+    {
+        try
+        {
+            await taskService.DeleteTask(task);
+            Tasks.Remove(task);
+            ConfirmDeleteTask = false;
+        }
+        catch (Exception)
+        {
+            return;
+        }
+    }
+
+    public async Task Edit(TaskModel task)
+    {
+        try
+        {
+            await taskService.EditTask(task);
+            Tasks = await taskService.GetTasks();
+            ConfirmEditTask = false;
+            EditErrorMessage = "";
+        }
+        catch (Exception)
+        {
+            EditErrorMessage = "User already has a list with this name.";
+            return;
+        }
+    }
+}
