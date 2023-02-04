@@ -11,7 +11,7 @@
     {
         @if (category.Title != "No category")
         {
-            <div class="p-2 m-2 border-5 bg-warning bg-opacity-25 rounded-3 d-flex flex-column" style="width: calc(20% - 16px); min-height: 50px; ">
+            <div class="p-2 m-2 border-5 bg-success bg-opacity-50 rounded-3 d-flex flex-column justify-content-between gap-2 overflow-scroll" style="width: calc((100/3)*1% - 16px); height: 150px; scrollbar-width: none;">
                 @if (!ConfirmDeleteCategory || TempCategory.Id != category.Id)
                 {
                     <div class="d-flex w-100 justify-content-between">
@@ -21,32 +21,19 @@
                 }
                 else
                 {
-                    <div class="d-flex w-100 justify-content-between">
-                        <h4 class="mb-0 align-self-center" style="height: fit-content">Are you sure?</h4>
+                    <div class="d-flex w-100 justify-content-between gap-2">
+                        <p class="mb-0 align-self-center" style="height: fit-content">Are you sure?</p>
                         <button @onclick="() => Delete(category)" class="btn btn-outline-success oi oi-check" style="height: 40px; width: 40px"></button>
                         <button @onclick="() => ToggleDelete(category)" class="btn btn-outline-danger oi oi-x" style="height: 40px; width: 40px"></button>
                     </div>
+
                 }
 
-                <hr class="opacity-75 rounded-pill" style="height: 2px;" />
+                <hr class="rounded-pill" style="height: 2px;" />
 
-
-                @if (category.TaskLists.Count != 0)
-                {
-                    <div>
-                        <h6>This category lists</h6>
-                        <ul>
-                            @foreach (var list in category.TaskLists)
-                            {
-                                <li>@list.Title</li>
-                            }
-                        </ul>
-                    </div>
-                }
-                else
-                {
-                    <h6>No lists in this category</h6>
-                }
+                <div>
+                    <h6>Number of lists: @category.TaskLists.Count</h6>
+                </div>
             </div>
 
 

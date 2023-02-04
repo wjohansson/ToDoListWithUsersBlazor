@@ -8,12 +8,6 @@
 @using ToDoListWithUsersBlazor.Services;
 @inject NavigationManager navigationManager
 
-<div class="d-flex justify-content-between">
-    <h3>Create a new Task</h3>
-
-    <a href="" @onclick="@(() => navigationManager.NavigateTo("/"))" @onclick:preventDefault class="btn btn-outline-secondary">Back</a>
-</div>
-
 <p class="text-danger">@ErrorMessage</p>
 <EditForm Model="@NewTask" OnValidSubmit="@Create">
     <DataAnnotationsValidator />
@@ -67,6 +61,7 @@
         try
         {
             await taskService.CreateTask(NewTask);
+            ErrorMessage = "";
         }
         catch (Exception)
         {

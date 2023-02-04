@@ -14,29 +14,29 @@
 
             <hr class="bg-white my-0" />
 
-            <div class="d-flex flex-wrap" style="min-width: 1000px">
+            <div class="d-flex flex-wrap">
                 <Virtualize Context="taskList" Items="@TaskLists">
                     @if (taskList?.CategoryId == category?.Id)
                     {
-                        <div class="d-flex flex-column w-25">
-                            <div @onpointerdown="() => GoToList(taskList)" class="p-2 m-2 border-5 bg-opacity-25 rounded-3 hover d-flex flex-column flex-wrap justify-content-between overflow-auto" style="height: 200px; scrollbar-width: none;">
+                        <div class="d-flex flex-column w-50">
+                            <div @onpointerdown="@(() => GetList(taskList))" class="p-2 m-2 border-5 bg-opacity-25 rounded-3 @(taskList.Id == CurrentActive.Id["ListId"] ? "activelist" : "list") list d-flex flex-column flex-wrap justify-content-between overflow-auto" style="height: 130px; scrollbar-width: none;">
                                 <div>
                                     @if ((!ConfirmEditList && !ConfirmDeleteList) || taskList.Id != TempList.Id)
                                     {
                                         <div class="text-center mb-0">@taskList?.Title</div>
-                                        <hr class="bg-black mx-2 my-1" />
+                                        <hr class="bg-black mx-2 my-1 @(taskList.Id == CurrentActive.Id["ListId"] ? "bg-white" : "bg-black")" />
 
                                         <ul class="d-flex flex-column gap-2 list-group">
                                             <Virtualize Context="task" Items="@taskList?.Tasks">
                                                 <li class="form-check d-flex justify-content-between align-items-center px-2 rounded-3 bg-success text-white @(task.Completed ? "opacity-50" : "")">
                                                     @task.Title
                                                     @if (task.Completed)
-                                            {
-                                                <span class="oi oi-check text-black" style="height: 16px;"></span>
-                                            }
-                                        </li>
-                                    </Virtualize>
-                                </ul>
+                                                    {
+                                                        <span class="oi oi-check text-black" style="height: 16px;"></span>
+                                                    }
+                                                </li>
+                                            </Virtualize>
+                                        </ul>
                                     }
                                     else if (taskList.Id == TempList.Id && ConfirmDeleteList)
                                     {
@@ -58,7 +58,7 @@
 
                                                 <div class="form-group col">
                                                     <label for="category">Category</label>
-                                                    <InputSelect id="category" @bind-Value="CategoryId" class="form-control">
+                                                    <InputSelect id="category" @bind-Value="taskList.CategoryId" @onpointerdown="@(() => _shouldRender = false)" class="form-control">
                                                         @if (User != null)
                                                         {
                                                             <option value="@User.Categories.First(x => x.Title == "No category").Id">No category</option>
@@ -86,10 +86,12 @@
                                     }
                                 </div>
                             </div>
+
                             <div class="gap-2 mb-4 d-flex justify-content-center">
-                                <button @onclick="() => ToggleEdit(taskList)" class="btn btn-secondary oi oi-pencil" style="height: 30px; width: calc(50% - 12px)"></button>
+                                <button @onpointerup="() => ToggleEdit(taskList)" class="btn btn-secondary oi oi-pencil" style="height: 30px; width: calc(50% - 12px)"></button>
                                 <button @onclick="() => ToggleDelete(taskList)" class="btn btn-outline-danger oi oi-trash" style="height: 30px; width: calc(50% - 12px)"></button>
                             </div>
+
                             <br />
                         </div>
                     }
@@ -100,7 +102,7 @@
 </div>
 
 <style>
-    .hover {
+    .list {
         background-color: rgb(255, 255, 50);
         opacity: 0.8;
         -webkit-transition: background-color 0.2s ease-in-out;
@@ -108,8 +110,22 @@
         transition: background-color 0.2s ease-in-out;
     }
 
-    .hover:hover {
+    .list:hover {
         background-color: rgb(255, 200, 50);
+        cursor: pointer;
+    }
+    
+    .activelist {
+        background-color: rgb(100, 50, 50);
+        color: white;
+        opacity: 0.8;
+        -webkit-transition: background-color 0.2s ease-in-out;
+        -moz-transition: background-color 0.2s ease-in-out;
+        transition: background-color 0.2s ease-in-out;
+    }
+
+    .activelist:hover {
+        background-color: rgb(150, 50, 50);
         cursor: pointer;
     }
 
@@ -117,16 +133,28 @@
 
 @code {
     [Parameter]
-    public List<TaskListModel?> TaskLists { get; set; }
+    public List<TaskListModel> TaskLists { get; set; }
 
     [Parameter]
     public UserModel User { get; set; }
+
+    [Parameter]
+    public TaskListModel TaskList { get; set; }
+
+    [Parameter]
+    public EventCallback<TaskListModel> OnGoToList { get; set; }
 
     public TaskListModel TempList { get; set; } = new();
     public Guid CategoryId { get; set; }
     public string EditErrorMessage { get; set; } = "";
     public bool ConfirmDeleteList { get; set; } = false;
     public bool ConfirmEditList { get; set; } = false;
+    private bool _shouldRender = true;
+
+    protected override bool ShouldRender()
+    {
+        return _shouldRender;
+    }
 
     public void ToggleDelete(TaskListModel taskList)
     {
@@ -145,6 +173,19 @@
 
     public void ToggleEdit(TaskListModel taskList)
     {
+        _shouldRender = true;
+
+        if (!ConfirmEditList)
+        {
+            TempList.CategoryId = taskList.CategoryId;
+            TempList.Title = taskList.Title;
+        }
+        else if (ConfirmEditList && TempList.Id == taskList.Id)
+        {
+            taskList.CategoryId = TempList.CategoryId;
+            taskList.Title = TempList.Title;
+        }
+
         if (TempList.Id != taskList.Id)
         {
             TempList.Id = taskList.Id;
@@ -159,7 +200,7 @@
         EditErrorMessage = "";
     }
 
-    public void GoToList(TaskListModel taskList)
+    public async void GetList(TaskListModel taskList)
     {
         if ((ConfirmDeleteList || ConfirmEditList) && TempList.Id == taskList.Id)
         {
@@ -167,7 +208,7 @@
         }
 
         CurrentActive.Id["ListId"] = taskList.Id;
-        navigationManager.NavigateTo("/list", true);
+        await OnGoToList.InvokeAsync();
     }
 
     public async Task Delete(TaskListModel taskList)
@@ -186,17 +227,21 @@
 
     public async Task Edit(TaskListModel taskList)
     {
+        Guid? currentCategoryId = Guid.Empty;
         try
         {
-            taskList.CategoryId = CategoryId;
+            _shouldRender = false;
             await listService.EditList(taskList);
             TaskLists = await listService.GetLists();
             ConfirmEditList = false;
             EditErrorMessage = "";
+            _shouldRender = true;
         }
         catch (Exception)
         {
             EditErrorMessage = "User already has a list with this name.";
+            taskList.CategoryId = TempList.CategoryId;
+            _shouldRender = true;
             return;
         }
     }

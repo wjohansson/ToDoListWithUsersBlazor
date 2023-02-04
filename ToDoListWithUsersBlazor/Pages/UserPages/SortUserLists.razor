@@ -4,25 +4,28 @@
 @inject UserServiceUi userService
 @inject TaskListServiceUi listService
 
-<h3 for="sort" class="text-white ">Sort</h3>
-
-
-<EditForm Model="User">
+<div class="text-white d-flex gap-3">
+    <span class="align-self-center">Sort</span>
+    <EditForm Model="User">
     <div class="form-group col" style="width: 200px;">
         <InputSelect id="sort" @bind-Value="User.SortLists" class="form-control">
-            @foreach (var sort in Enum.GetValues(typeof(SortLists)))
-            {
-                <option @onclick="@UpdateSort" value="@sort">@sort</option>
+                @foreach (var sort in Enum.GetValues(typeof(SortLists)))
+                {
+                    <option @onclick="@UpdateSort" value="@sort">@sort</option>
 
-            }
+                }
         </InputSelect>
 
     </div>
 </EditForm>
+</div>
+
+
+
 
 @code {
     [Parameter]
-    public EventCallback<List<TaskListModel>> OnSortChanged{ get; set; }
+    public EventCallback<List<TaskListModel>> OnSortChanged { get; set; }
     [Parameter]
     public UserModel User { get; set; }
     public SortLists SortLists { get; set; }

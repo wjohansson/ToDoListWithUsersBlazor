@@ -1,32 +1,66 @@
 ﻿@using DataLibrary.Enums;
 @using DataLibrary.Models;
-@using ToDoListWithUsersApi;
+@using ToDoListWithUsersBlazor.Pages.CategoryPages
 @using ToDoListWithUsersBlazor.Pages.TaskListPages
 @using ToDoListWithUsersBlazor.Services;
 @inject UserServiceUi userService
 @inject TaskListServiceUi listService
 @inject CategoryServiceUi categoryService
+@inject TaskServiceUi taskService
 @inject NavigationManager navigationManager
 
-<h1>Welcome '@User.Username'</h1>
+<h1>Welcome <span class="fw-bold">@User.Username</span></h1>
 
 @if (TaskLists != null && Categories != null)
 {
+    <div class="w-100 d-flex gap-2">
+        <div class="p-2 my-2 w-50 rounded-3 d-flex flex-column justify-content-between " style="background-color: darkslategray; height: 570px;">
+            <SortUserLists User="@User" OnSortChanged="@SortChanged"></SortUserLists>
 
-    <div class="p-2 my-2 w-100 rounded-3 d-flex flex-column flex-wrap justify-content-between" style="background-color: darkslategray">
-        <CreateList OnListCreated="@ListCreated" User="@User"></CreateList>
-        <hr class="opacity-75 bg-warning rounded-pill"/>
-        <SortUserLists User="@User" OnSortChanged="@SortChanged"></SortUserLists>
-        <hr class="opacity-75 bg-warning rounded-pill" />
-        <UserLists TaskLists="@TaskLists" User="@User"></UserLists>
+            <div class="rounded-3 p-2 my-2 overflow-scroll h-100" style="background-color: rgb(70, 120, 120); scrollbar-width: none">
+                <UserLists TaskLists="@TaskLists" User="@User" TaskList="@TaskList" OnGoToList="@ToggleList"></UserLists>
+            </div>
+            <div>
+                <button @onclick="@ToggleCreateList" class="btn btn-outline-warning">Create list</button>
+                <button @onclick="@ToggleManageCategories" class="btn btn-outline-warning">Manage Categories</button>
+            </div>
+
+        </div>
+
+        @if (CreateList)
+        {
+            <div class="p-2 my-2 w-50 h-100 rounded-3 d-flex flex-column" style="background-color: rgb(100, 50, 50)">
+                <CreateList OnListCreated="@ListCreated" User="@User"></CreateList>
+            </div>
+        }
+        else if (ManageCategories)
+        {
+            <div class="p-2 my-2 w-50 rounded-3 d-flex flex-column overflow-scroll" style="background-color: rgb(100, 50, 50); height: 570px !important;  scrollbar-width: none;">
+                <ManageCategories Categories="@Categories"></ManageCategories>
+            </div>
+        }
+        else if (TaskList != null)
+        {
+            <div class="p-2 my-2 w-50 rounded-3 d-flex flex-column overflow-scroll" style="background-color: rgb(100, 50, 50); height: 570px !important;  scrollbar-width: none;">
+                <CurrentList Tasks="@Tasks" ThisList="@TaskList" User="@User"></CurrentList>
+            </div>
+        }
+        else
+        {
+            <div class="w-50" style="height: 0px;"></div>
+        }
     </div>
 }
 
 @code {
     [Parameter]
     public UserModel? User { get; set; }
-    public List<TaskListModel?> TaskLists { get; set; }
-    public List<CategoryModel?> Categories { get; set; }
+    public List<TaskListModel>? TaskLists { get; set; }
+    public TaskListModel? TaskList { get; set; } = null;
+    public List<CategoryModel>? Categories { get; set; }
+    public bool CreateList { get; set; }
+    public bool ManageCategories { get; set; }
+    public List<TaskModel>? Tasks { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
@@ -41,9 +75,41 @@
         }
     }
 
+    public void ToggleCreateList()
+    {
+        CreateList = !CreateList;
+        ManageCategories = false;
+        TaskList = null;
+    }
+
+    public void ToggleManageCategories()
+    {
+        ManageCategories = !ManageCategories;
+        CreateList = false;
+        TaskList = null;
+    }
+
+    public async void ToggleList(TaskListModel list)
+    {
+        if (TaskList?.Id == CurrentActive.Id["ListId"])
+        {
+            TaskList = null;
+            CurrentActive.Id["ListId"] = Guid.Empty;
+            StateHasChanged();
+            return;
+        }
+
+        TaskList = await listService.GetList(CurrentActive.Id["ListId"]);
+        Tasks = await taskService.GetTasks();
+        ManageCategories = false;
+        CreateList = false;
+        StateHasChanged();
+    }
+
     protected async Task ListCreated()
     {
         TaskLists = await listService.GetLists();
+        CreateList = false;
     }
 
     protected async Task SortChanged()

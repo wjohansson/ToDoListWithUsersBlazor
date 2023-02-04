@@ -10,21 +10,19 @@
 
 @if (Categories != null)
 {
-    <h3>Manage Categories</h3>
+    <div class="text-white">
+        <h3>Manage Categories</h3>
 
-    <CreateCategory OnCategoryCreated="@CategoryCreated"></CreateCategory>
+        <CreateCategory OnCategoryCreated="@CategoryCreated"></CreateCategory>
 
-    <hr class="opacity-75 rounded-pill" style="height: 6px;" />
+        <hr class="opacity-75 rounded-pill" style="height: 6px;" />
 
-    <UserCategories Categories="@Categories" OnCategoryDeleted="CategoryDeleted"></UserCategories>
-
-    <button type="reset" @onclick="@(() => navigationManager.NavigateTo("/"))" @onclick:preventDefault class="btn btn-secondary">Back</button>
+        <UserCategories Categories="@Categories" OnCategoryDeleted="CategoryDeleted"></UserCategories>
+    </div>
 }
 
-
-
-
 @code {
+    [Parameter]
     public List<CategoryModel>? Categories { get; set; }
     public CategoryModel TempCategory { get; set; } = new();
     public string ErrorMessage { get; set; }
