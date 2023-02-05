@@ -62,11 +62,17 @@
 
                                 @if (ExpandedTasks.Any(x => x == task.Id) && !ConfirmCreateSubTask)
                                 {
-                                    <ul>
-                                        <Virtualize Items="@task?.SubTasks">
-                                            <li>@context.Title</li>
+                                    <div class="d-flex flex-column gap-2">
+                                        <Virtualize Context="subTask" Items="@task?.SubTasks">
+                                            <div class="h5 rounded-3 px-2 py-1 d-flex align-items-center justify-content-between w-100" style="background-color: rgb(75, 125, 125)">
+                                                <div>
+                                                    <span>@subTask.Title | </span>
+                                                    <span class="h6 opacity-50">@subTask.Description</span>
+                                                </div>
+                                                <button @onclick="@(() => DeleteSubTask(subTask))" class="btn btn-outline-light oi oi-sm oi-x p-0" style="width: 30px; height: 25px;"></button>
+                                            </div>
                                         </Virtualize>
-                                    </ul>
+                                    </div>
                                 }
                                 else if (ExpandedTasks.Any(x => x == task.Id) && ConfirmCreateSubTask)
                                 {
@@ -142,7 +148,7 @@
 
 <style>
     .task {
-        background-color: rgb(100, 0, 0);
+        background-color: darkslategray;
         opacity: 0.8;
         -webkit-transition: background-color 0.2s ease-in-out;
         -moz-transition: background-color 0.2s ease-in-out;
@@ -150,12 +156,12 @@
     }
 
         .task:hover {
-            background-color: rgb(125, 0, 0);
+            background-color: rgb(50, 100, 100);
             cursor: pointer;
         }
 
     li::marker {
-        content: "| ";
+        content: "- ";
         font-size: 1.2em;
     }
 
@@ -334,5 +340,18 @@
     {
         ConfirmCreateSubTask = false;
         task.SubTasks = await subTaskService.GetSubTasks();
+    }
+
+    public async Task DeleteSubTask(SubTaskModel subTask)
+    {
+        try
+        {
+            await subTaskService.DeleteSubTask(subTask);
+            Tasks = await taskService.GetTasks();
+        }
+        catch (Exception)
+        {
+            return;
+        }
     }
 }
