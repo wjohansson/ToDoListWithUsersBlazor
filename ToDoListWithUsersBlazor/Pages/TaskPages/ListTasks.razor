@@ -70,7 +70,7 @@
                                 }
                                 else if (ExpandedTasks.Any(x => x == task.Id) && ConfirmCreateSubTask)
                                 {
-                                    <CreateSubTask OnSubTaskCreated="@(() => SubTaskCreated(task))"></CreateSubTask>
+                                    <CreateSubTask Task="@task" OnSubTaskCreated="@(() => SubTaskCreated(task))"></CreateSubTask>
                                 }
                             }
                             else if (task.Id == TempTask.Id && ConfirmDeleteTask)
@@ -245,7 +245,7 @@
         TempTask.Id = task.Id;
     }
 
-    public void ToggleExpandTask(TaskModel task)
+    public async void ToggleExpandTask(TaskModel task)
     {
         if (ExpandedTasks.Any(x => x == task.Id))
         {
@@ -253,6 +253,7 @@
         }
         else
         {
+            await taskService.GetTask(task.Id);
             ExpandedTasks.Add(task.Id);
         }
 
