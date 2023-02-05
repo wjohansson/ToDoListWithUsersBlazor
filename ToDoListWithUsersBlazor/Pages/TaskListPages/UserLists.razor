@@ -28,7 +28,7 @@
 
                                         <ul class="d-flex flex-column gap-2 list-group">
                                             <Virtualize Context="task" Items="@taskList?.Tasks">
-                                                <li class="form-check d-flex justify-content-between align-items-center px-2 rounded-3 bg-success text-white @(task.Completed ? "opacity-50" : "")">
+                                                <li class="form-check d-flex justify-content-between align-items-center px-2 rounded-3 text-white @(task.Completed ? "opacity-50" : "")" style="background-color: darkslategray">
                                                     @task.Title
                                                     @if (task.Completed)
                                                     {
@@ -144,6 +144,9 @@
     [Parameter]
     public EventCallback<TaskListModel> OnGoToList { get; set; }
 
+    [Parameter]
+    public EventCallback<TaskListModel> OnDeleteActiveList { get; set; }
+
     public TaskListModel TempList { get; set; } = new();
     public Guid CategoryId { get; set; }
     public string EditErrorMessage { get; set; } = "";
@@ -218,6 +221,11 @@
             await listService.DeleteList(taskList);
             TaskLists.Remove(taskList);
             ConfirmDeleteList = false;
+
+            if (CurrentActive.Id["ListId"] == taskList.Id)
+            {
+                await OnDeleteActiveList.InvokeAsync();
+            }
         }
         catch (Exception)
         {

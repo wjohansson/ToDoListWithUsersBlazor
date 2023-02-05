@@ -9,16 +9,14 @@
 @inject TaskServiceUi taskService
 @inject NavigationManager navigationManager
 
-<h1>Welcome <span class="fw-bold">@User.Username</span></h1>
-
 @if (TaskLists != null && Categories != null)
 {
     <div class="w-100 d-flex gap-2">
-        <div class="p-2 my-2 w-50 rounded-3 d-flex flex-column justify-content-between " style="background-color: darkslategray; height: 570px;">
+        <div class="p-2 w-50 rounded-3 d-flex flex-column justify-content-between" style="background-color: darkslategray; height: 630px;">
             <SortUserLists User="@User" OnSortChanged="@SortChanged"></SortUserLists>
 
             <div class="rounded-3 p-2 my-2 overflow-scroll h-100" style="background-color: rgb(70, 120, 120); scrollbar-width: none">
-                <UserLists TaskLists="@TaskLists" User="@User" TaskList="@TaskList" OnGoToList="@ToggleList"></UserLists>
+                <UserLists TaskLists="@TaskLists" User="@User" TaskList="@TaskList" OnGoToList="@ToggleList" OnDeleteActiveList="@ToggleList"></UserLists>
             </div>
             <div>
                 <button @onclick="@ToggleCreateList" class="btn btn-outline-warning">Create list</button>
@@ -26,29 +24,21 @@
             </div>
 
         </div>
+        <div class="p-2 w-50 rounded-3 d-flex flex-column overflow-scroll" style="background-color: rgb(100, 50, 50); scrollbar-width:none; height: 630px;">
 
-        @if (CreateList)
-        {
-            <div class="p-2 my-2 w-50 h-100 rounded-3 d-flex flex-column" style="background-color: rgb(100, 50, 50)">
+            @if (CreateList)
+            {
                 <CreateList OnListCreated="@ListCreated" User="@User"></CreateList>
-            </div>
-        }
-        else if (ManageCategories)
-        {
-            <div class="p-2 my-2 w-50 rounded-3 d-flex flex-column overflow-scroll" style="background-color: rgb(100, 50, 50); height: 570px !important;  scrollbar-width: none;">
+            }
+            else if (ManageCategories)
+            {
                 <ManageCategories Categories="@Categories"></ManageCategories>
-            </div>
-        }
-        else if (TaskList != null)
-        {
-            <div class="p-2 my-2 w-50 rounded-3 d-flex flex-column overflow-scroll" style="background-color: rgb(100, 50, 50); height: 570px !important;  scrollbar-width: none;">
+            }
+            else if (TaskList != null)
+            {
                 <CurrentList Tasks="@Tasks" ThisList="@TaskList" User="@User"></CurrentList>
-            </div>
-        }
-        else
-        {
-            <div class="w-50" style="height: 0px;"></div>
-        }
+            }
+        </div>
     </div>
 }
 
@@ -80,6 +70,8 @@
         CreateList = !CreateList;
         ManageCategories = false;
         TaskList = null;
+        CurrentActive.Id["ListId"] = Guid.Empty;
+        StateHasChanged();
     }
 
     public void ToggleManageCategories()
@@ -87,14 +79,18 @@
         ManageCategories = !ManageCategories;
         CreateList = false;
         TaskList = null;
+        CurrentActive.Id["ListId"] = Guid.Empty;
+        StateHasChanged();
     }
 
-    public async void ToggleList(TaskListModel list)
+    public async void ToggleList()
     {
         if (TaskList?.Id == CurrentActive.Id["ListId"])
         {
             TaskList = null;
             CurrentActive.Id["ListId"] = Guid.Empty;
+            TaskLists = await listService.GetLists();
+            Tasks = await taskService.GetTasks();
             StateHasChanged();
             return;
         }

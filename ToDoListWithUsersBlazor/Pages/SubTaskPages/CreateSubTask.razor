@@ -8,12 +8,6 @@
 @using ToDoListWithUsersBlazor.Services;
 @inject NavigationManager navigationManager
 
-<div class="d-flex justify-content-between">
-    <h3>Create a new Sub Task</h3>
-
-    <a href="" @onclick="@(() => navigationManager.NavigateTo("/list"))" @onclick:preventDefault class="btn btn-outline-warning">Back</a>
-</div>
-
 <p class="text-danger">@ErrorMessage</p>
 <EditForm Model="@NewSubTask" OnValidSubmit="@Create">
     <DataAnnotationsValidator />
@@ -27,12 +21,6 @@
             <InputText placeholder="Description..." id="description" @bind-Value="NewSubTask.Description" class="form-control" />
             <ValidationMessage For="@(() => NewSubTask.Description)" />
         </div>
-    </div>
-
-    <br />
-
-    <div class="form-group row">
-        
     </div>
 
     <br />
