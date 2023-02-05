@@ -44,36 +44,12 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcU3ViVGFza1BhZ2VzXENyZWF0ZVN1YlRhc2sucmF6b3I=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/willi/source/repos/ToDoListWithUsersBlazor/ToDoListWithUsersBlazor/Pages/SubTaskPages/DeleteSubTask.razor]
-build_metadata.AdditionalFiles.TargetPath = UGFnZXNcU3ViVGFza1BhZ2VzXERlbGV0ZVN1YlRhc2sucmF6b3I=
-build_metadata.AdditionalFiles.CssScope = 
-
-[C:/Users/willi/source/repos/ToDoListWithUsersBlazor/ToDoListWithUsersBlazor/Pages/SubTaskPages/EditSubTask.razor]
-build_metadata.AdditionalFiles.TargetPath = UGFnZXNcU3ViVGFza1BhZ2VzXEVkaXRTdWJUYXNrLnJhem9y
-build_metadata.AdditionalFiles.CssScope = 
-
-[C:/Users/willi/source/repos/ToDoListWithUsersBlazor/ToDoListWithUsersBlazor/Pages/SubTaskPages/SortTaskSubTasks.razor]
-build_metadata.AdditionalFiles.TargetPath = UGFnZXNcU3ViVGFza1BhZ2VzXFNvcnRUYXNrU3ViVGFza3MucmF6b3I=
-build_metadata.AdditionalFiles.CssScope = 
-
-[C:/Users/willi/source/repos/ToDoListWithUsersBlazor/ToDoListWithUsersBlazor/Pages/SubTaskPages/TaskSubTasks.razor]
-build_metadata.AdditionalFiles.TargetPath = UGFnZXNcU3ViVGFza1BhZ2VzXFRhc2tTdWJUYXNrcy5yYXpvcg==
-build_metadata.AdditionalFiles.CssScope = 
-
 [C:/Users/willi/source/repos/ToDoListWithUsersBlazor/ToDoListWithUsersBlazor/Pages/TaskListPages/CreateList.razor]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcVGFza0xpc3RQYWdlc1xDcmVhdGVMaXN0LnJhem9y
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/Users/willi/source/repos/ToDoListWithUsersBlazor/ToDoListWithUsersBlazor/Pages/TaskListPages/CurrentList.razor]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcVGFza0xpc3RQYWdlc1xDdXJyZW50TGlzdC5yYXpvcg==
-build_metadata.AdditionalFiles.CssScope = 
-
-[C:/Users/willi/source/repos/ToDoListWithUsersBlazor/ToDoListWithUsersBlazor/Pages/TaskListPages/DeleteList.razor]
-build_metadata.AdditionalFiles.TargetPath = UGFnZXNcVGFza0xpc3RQYWdlc1xEZWxldGVMaXN0LnJhem9y
-build_metadata.AdditionalFiles.CssScope = 
-
-[C:/Users/willi/source/repos/ToDoListWithUsersBlazor/ToDoListWithUsersBlazor/Pages/TaskListPages/EditList.razor]
-build_metadata.AdditionalFiles.TargetPath = UGFnZXNcVGFza0xpc3RQYWdlc1xFZGl0TGlzdC5yYXpvcg==
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/Users/willi/source/repos/ToDoListWithUsersBlazor/ToDoListWithUsersBlazor/Pages/TaskListPages/SortListTasks.razor]
@@ -86,18 +62,6 @@ build_metadata.AdditionalFiles.CssScope =
 
 [C:/Users/willi/source/repos/ToDoListWithUsersBlazor/ToDoListWithUsersBlazor/Pages/TaskPages/CreateTask.razor]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcVGFza1BhZ2VzXENyZWF0ZVRhc2sucmF6b3I=
-build_metadata.AdditionalFiles.CssScope = 
-
-[C:/Users/willi/source/repos/ToDoListWithUsersBlazor/ToDoListWithUsersBlazor/Pages/TaskPages/CurrentTask.razor]
-build_metadata.AdditionalFiles.TargetPath = UGFnZXNcVGFza1BhZ2VzXEN1cnJlbnRUYXNrLnJhem9y
-build_metadata.AdditionalFiles.CssScope = 
-
-[C:/Users/willi/source/repos/ToDoListWithUsersBlazor/ToDoListWithUsersBlazor/Pages/TaskPages/DeleteTask.razor]
-build_metadata.AdditionalFiles.TargetPath = UGFnZXNcVGFza1BhZ2VzXERlbGV0ZVRhc2sucmF6b3I=
-build_metadata.AdditionalFiles.CssScope = 
-
-[C:/Users/willi/source/repos/ToDoListWithUsersBlazor/ToDoListWithUsersBlazor/Pages/TaskPages/EditTask.razor]
-build_metadata.AdditionalFiles.TargetPath = UGFnZXNcVGFza1BhZ2VzXEVkaXRUYXNrLnJhem9y
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/Users/willi/source/repos/ToDoListWithUsersBlazor/ToDoListWithUsersBlazor/Pages/TaskPages/ListTasks.razor]
