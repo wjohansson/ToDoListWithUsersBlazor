@@ -28,7 +28,7 @@
                 <InputSelect id="category" @bind-Value="taskList.CategoryId" class="form-control">
                     @if (User != null)
                     {
-                        <option value="@User.Categories.First(x => x.Title == "No category")" class="text-opacity-75">No category</option>
+                        <option value="@User.Categories.First(x => x.Title == "No category").Id" class="text-opacity-75">No category</option>
                         @foreach (CategoryModel category in User.Categories)
                         {
                             @if (category.Title != "No category")

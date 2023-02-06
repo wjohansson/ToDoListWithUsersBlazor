@@ -100,9 +100,9 @@
 
 
 @code {
-    private UserModel userModel { get; set; } = new();
-    private UserModel? loggedInUser { get; set; }
-    private string errorMessage { get; set; }
+    private UserModel userModel = new();
+    private UserModel? loggedInUser;
+    private string errorMessage = "";
 
     public async Task Create()
     {

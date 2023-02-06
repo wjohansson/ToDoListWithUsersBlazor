@@ -149,11 +149,10 @@
     [Parameter]
     public EventCallback<TaskListModel> OnDeleteActiveList { get; set; }
 
-    private TaskListModel tempList { get; set; } = new();
-    private Guid categoryId { get; set; }
-    private string editErrorMessage { get; set; } = "";
-    private bool confirmDeleteList { get; set; } = false;
-    private bool confirmEditList { get; set; } = false;
+    private TaskListModel tempList = new();
+    private string editErrorMessage = "";
+    private bool confirmDeleteList = false;
+    private bool confirmEditList = false;
     private bool shouldRender = true;
 
     protected override bool ShouldRender()

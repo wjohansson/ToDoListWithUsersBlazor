@@ -42,8 +42,8 @@
 </div>
 
 @code {
-    private UserModel? user { get; set; } = new();
-    private string errorMessage { get; set; } = "";
+    private UserModel? user = new();
+    private string errorMessage = "";
 
     public async Task LoginUser()
     {

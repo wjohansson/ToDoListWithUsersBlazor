@@ -53,8 +53,8 @@
     [Parameter]
     public EventCallback<List<TaskListModel>> OnTaskCreated { get; set; }
 
-    private TaskModel newTask { get; set; } = new();
-    private string errorMessage { get; set; } = "";
+    private TaskModel newTask = new();
+    private string errorMessage = "";
 
 
     public async Task Create()

@@ -177,12 +177,12 @@
         {
             Id = Guid.Empty
         };
-    private List<Guid> expandedTasks { get; set; } = new();
-    private string editErrorMessage { get; set; } = "";
-    private bool confirmDeleteTask { get; set; } = false;
-    private bool confirmEditTask { get; set; } = false;
-    private bool confirmCreateSubTask { get; set; } = false;
-    private bool expandButton { get; set; } = false;
+    private List<Guid> expandedTasks = new();
+    private string editErrorMessage = "";
+    private bool confirmDeleteTask = false;
+    private bool confirmEditTask = false;
+    private bool confirmCreateSubTask = false;
+    private bool expandButton = false;
 
     public void ToggleDelete(TaskModel task)
     {
