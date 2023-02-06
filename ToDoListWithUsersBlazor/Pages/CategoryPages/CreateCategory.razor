@@ -5,13 +5,13 @@
 @using DataLibrary.Models;
 @using ToDoListWithUsersBlazor.Services;
 
-<p class="text-danger">@ErrorMessage</p>
-<EditForm Model="@Category" OnValidSubmit="@Create">
+<p class="text-danger">@errorMessage</p>
+<EditForm Model="@category" OnValidSubmit="@Create">
     <DataAnnotationsValidator />
     <div class="form-group row">
         <div class="form-group col d-flex">
-            <InputText placeholder="Title..." id="title" @bind-Value="Category.Title" class="form-control" />
-            <ValidationMessage For="@(() => Category.Title)" />
+            <InputText placeholder="Title..." id="title" @bind-Value="category.Title" class="form-control" />
+            <ValidationMessage For="@(() => category.Title)" />
         </div>
     </div>
 
@@ -28,21 +28,21 @@
 @code {
     [Parameter]
     public EventCallback<List<TaskListModel>> OnCategoryCreated { get; set; }
-    public CategoryModel Category { get; set; } = new();
-    public string ErrorMessage { get; set; } = "";
+    private CategoryModel category = new();
+    private string errorMessage = "";
 
     public async Task Create()
     {
         try
         {
-            await categoryService.CreateCategory(Category);
+            await categoryService.CreateCategory(category);
         }
         catch (Exception)
         {
-            ErrorMessage = "Category already exists.";
+            errorMessage = "Category already exists.";
             return;
         }
-        Category = new();
+        category = new();
         await OnCategoryCreated.InvokeAsync();
     }
 

@@ -14,18 +14,18 @@
     <h3 class="text-white">Create a new list</h3>
 </div>
 
-<p class="text-danger">@ErrorMessage</p>
-<EditForm Model="@TaskList" OnValidSubmit="@Create" class="w-100">
+<p class="text-danger">@errorMessage</p>
+<EditForm Model="@taskList" OnValidSubmit="@Create" class="w-100">
     <DataAnnotationsValidator />
     <div class="d-flex flex-column">
         <div class="form-group row d-flex">
             <div class="form-group col">
-                <InputText placeholder="Title..." id="title" @bind-Value="TaskList.Title" class="form-control" />
-                <ValidationMessage For="@(() => TaskList.Title)" />
+                <InputText placeholder="Title..." id="title" @bind-Value="taskList.Title" class="form-control" />
+                <ValidationMessage For="@(() => taskList.Title)" />
             </div>
 
             <div class="form-group col">
-                <InputSelect id="category" @bind-Value="TaskList.CategoryId" class="form-control">
+                <InputSelect id="category" @bind-Value="taskList.CategoryId" class="form-control">
                     @if (User != null)
                     {
                         <option value="@User.Categories.First(x => x.Title == "No category")" class="text-opacity-75">No category</option>
@@ -60,39 +60,23 @@
     [Parameter]
     public UserModel? User { get; set; }
 
-    public TaskListModel TaskList { get; set; } = new();
-
-    //public List<CategoryModel>? Categories { get; set; }
-
-    public string CategoryTitle { get; set; } = "";
-
-    public string ErrorMessage { get; set; } = "";
-
-    //protected override async Task OnInitializedAsync()
-    //{
-    //    try
-    //    {
-    //        Categories = await categoryService.GetCategories();
-    //    }
-    //    catch (Exception)
-    //    {
-    //        Categories = null;
-    //    }
-    //}
+    private TaskListModel taskList = new();
+    private string categoryTitle = "";
+    private string errorMessage = "";
 
     public async Task Create()
     {
         try
         {
-            await listService.CreateList(TaskList);
+            await listService.CreateList(taskList);
 
-            TaskList = new TaskListModel();
-            CategoryTitle = "";
-            ErrorMessage = "";
+            taskList = new TaskListModel();
+            categoryTitle = "";
+            errorMessage = "";
         }
         catch (Exception)
         {
-            ErrorMessage = "User already has a list with this name";
+            errorMessage = "User already has a list with this name";
             return;
         }
         await OnListCreated.InvokeAsync();

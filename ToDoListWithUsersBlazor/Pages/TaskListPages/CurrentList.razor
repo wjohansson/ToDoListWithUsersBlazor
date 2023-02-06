@@ -26,7 +26,7 @@
         </div>
     </div>
 
-    <p class="text-danger">@ErrorMessage</p>
+    <p class="text-danger">@errorMessage</p>
 }
 
 <style>
@@ -44,7 +44,7 @@
     [Parameter]
     public List<TaskModel>? Tasks { get; set; }
 
-    public string ErrorMessage { get; set; } = "";
+    private string errorMessage { get; set; } = "";
 
     public async Task TaskCreated()
     {

@@ -9,14 +9,14 @@
 @inject TaskServiceUi taskService
 @inject NavigationManager navigationManager
 
-@if (TaskLists != null && Categories != null)
+@if (taskLists != null && categories != null)
 {
     <div class="w-100 d-flex gap-2">
         <div class="p-2 w-50 rounded-3 d-flex flex-column justify-content-between" style="background-color: darkslategray; height: 630px;">
             <SortUserLists User="@User" OnSortChanged="@SortChanged"></SortUserLists>
 
             <div class="rounded-3 p-2 my-2 overflow-scroll h-100" style="background-color: rgb(70, 120, 120); scrollbar-width: none">
-                <UserLists TaskLists="@TaskLists" User="@User" TaskList="@TaskList" OnGoToList="@ToggleList" OnDeleteActiveList="@ToggleList"></UserLists>
+                <UserLists TaskLists="@taskLists" User="@User" TaskList="@taskList" OnGoToList="@ToggleList" OnDeleteActiveList="@ToggleList"></UserLists>
             </div>
             <div>
                 <button @onclick="@ToggleCreateList" class="btn btn-outline-warning">Create list</button>
@@ -26,17 +26,17 @@
         </div>
         <div class="p-2 w-50 rounded-3 d-flex flex-column overflow-scroll" style="background-color: rgb(100, 50, 50); scrollbar-width:none; height: 630px;">
 
-            @if (CreateList)
+            @if (createList)
             {
                 <CreateList OnListCreated="@ListCreated" User="@User"></CreateList>
             }
-            else if (ManageCategories)
+            else if (manageCategories)
             {
-                <ManageCategories Categories="@Categories"></ManageCategories>
+                <ManageCategories Categories="@categories"></ManageCategories>
             }
-            else if (TaskList != null)
+            else if (taskList != null)
             {
-                <CurrentList Tasks="@Tasks" ThisList="@TaskList" User="@User"></CurrentList>
+                <CurrentList Tasks="@tasks" ThisList="@taskList" User="@User"></CurrentList>
             }
         </div>
     </div>
@@ -45,19 +45,20 @@
 @code {
     [Parameter]
     public UserModel? User { get; set; }
-    public List<TaskListModel>? TaskLists { get; set; }
-    public TaskListModel? TaskList { get; set; } = null;
-    public List<CategoryModel>? Categories { get; set; }
-    public bool CreateList { get; set; }
-    public bool ManageCategories { get; set; }
-    public List<TaskModel>? Tasks { get; set; }
+
+    private List<TaskListModel>? taskLists;
+    private TaskListModel? taskList = null;
+    private List<CategoryModel>? categories;
+    private bool createList;
+    private bool manageCategories;
+    private List<TaskModel>? tasks;
 
     protected override async Task OnInitializedAsync()
     {
         try
         {
-            TaskLists = await listService.GetLists();
-            Categories = await categoryService.GetCategories();
+            taskLists = await listService.GetLists();
+            categories = await categoryService.GetCategories();
         }
         catch (Exception)
         {
@@ -67,49 +68,49 @@
 
     public void ToggleCreateList()
     {
-        CreateList = !CreateList;
-        ManageCategories = false;
-        TaskList = null;
+        createList = !createList;
+        manageCategories = false;
+        taskList = null;
         CurrentActive.Id["ListId"] = Guid.Empty;
         StateHasChanged();
     }
 
     public void ToggleManageCategories()
     {
-        ManageCategories = !ManageCategories;
-        CreateList = false;
-        TaskList = null;
+        manageCategories = !manageCategories;
+        createList = false;
+        taskList = null;
         CurrentActive.Id["ListId"] = Guid.Empty;
         StateHasChanged();
     }
 
     public async void ToggleList()
     {
-        if (TaskList?.Id == CurrentActive.Id["ListId"])
+        if (taskList?.Id == CurrentActive.Id["ListId"])
         {
-            TaskList = null;
+            taskList = null;
             CurrentActive.Id["ListId"] = Guid.Empty;
-            TaskLists = await listService.GetLists();
-            Tasks = await taskService.GetTasks();
+            taskLists = await listService.GetLists();
+            tasks = await taskService.GetTasks();
             StateHasChanged();
             return;
         }
 
-        TaskList = await listService.GetList(CurrentActive.Id["ListId"]);
-        Tasks = await taskService.GetTasks();
-        ManageCategories = false;
-        CreateList = false;
+        taskList = await listService.GetList(CurrentActive.Id["ListId"]);
+        tasks = await taskService.GetTasks();
+        manageCategories = false;
+        createList = false;
         StateHasChanged();
     }
 
     protected async Task ListCreated()
     {
-        TaskLists = await listService.GetLists();
-        CreateList = false;
+        taskLists = await listService.GetLists();
+        createList = false;
     }
 
     protected async Task SortChanged()
     {
-        TaskLists = await listService.GetLists();
+        taskLists = await listService.GetLists();
     }
 }

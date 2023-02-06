@@ -26,9 +26,11 @@
 @code {
     [Parameter]
     public EventCallback<List<TaskListModel>> OnSortChanged { get; set; }
+
     [Parameter]
     public UserModel User { get; set; }
-    public SortLists SortLists { get; set; }
+
+    private SortLists sortLists { get; set; }
 
     public async Task UpdateSort()
     {

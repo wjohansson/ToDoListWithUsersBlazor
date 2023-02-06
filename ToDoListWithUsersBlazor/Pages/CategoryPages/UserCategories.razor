@@ -12,7 +12,7 @@
         @if (category.Title != "No category")
         {
             <div class="p-2 m-2 border-5 bg-success bg-opacity-50 rounded-3 d-flex flex-column justify-content-between gap-2 overflow-scroll" style="width: calc((100/3)*1% - 16px); height: 150px; scrollbar-width: none;">
-                @if (!ConfirmDeleteCategory || TempCategory.Id != category.Id)
+                @if (!confirmDeleteCategory || tempCategory.Id != category.Id)
                 {
                     <div class="d-flex w-100 justify-content-between">
                         <h4 class="mb-0 align-self-center" style="height: fit-content">@category.Title</h4>
@@ -48,9 +48,9 @@
     [Parameter]
     public List<CategoryModel>? Categories { get; set; }
 
-    public bool ConfirmDeleteCategory { get; set; } = false;
-    public CategoryModel TempCategory { get; set; } = new();
-    public string ErrorMessage { get; set; } = "";
+    private bool confirmDeleteCategory  = false;
+    private CategoryModel tempCategory = new();
+    public string errorMessage { get; set; } = "";
 
     public async void Delete(CategoryModel category)
     {
@@ -60,7 +60,7 @@
         }
         catch (Exception)
         {
-            ErrorMessage = "Something went wrong with deleting the category.";
+            errorMessage = "Something went wrong with deleting the category.";
             return;
         }
         await OnCategoryDeleted.InvokeAsync();
@@ -68,14 +68,14 @@
 
     public void ToggleDelete(CategoryModel category)
     {
-        if (TempCategory.Id != category.Id)
+        if (tempCategory.Id != category.Id)
         {
-            TempCategory.Id = category.Id;
-            ConfirmDeleteCategory = true;
+            tempCategory.Id = category.Id;
+            confirmDeleteCategory = true;
             return;
         }
 
-        ConfirmDeleteCategory = !ConfirmDeleteCategory;
+        confirmDeleteCategory = !confirmDeleteCategory;
         //StateHasChanged();
     }
 

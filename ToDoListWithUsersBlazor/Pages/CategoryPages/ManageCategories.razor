@@ -24,8 +24,8 @@
 @code {
     [Parameter]
     public List<CategoryModel>? Categories { get; set; }
-    public CategoryModel TempCategory { get; set; } = new();
-    public string ErrorMessage { get; set; }
+    private CategoryModel tempCategory = new();
+    private string errorMessage = "";
 
     protected override async Task OnInitializedAsync()
     {

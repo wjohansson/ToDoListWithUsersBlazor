@@ -11,19 +11,19 @@
     <div class="d-flex flex-column gap-4 w-50 p-4 rounded-3" style="background-color: rgb(200, 200, 200)">
         <h3 class="text-center">Create User</h3>
 
-        <p class="text-danger">@ErrorMessage</p>
-        <EditForm Model="@UserModel" OnValidSubmit="@Create">
+        <p class="text-danger">@errorMessage</p>
+        <EditForm Model="@userModel" OnValidSubmit="@Create">
             <DataAnnotationsValidator />
             <div class="form-group row">
                 <div class="form-group col">
                     <label for="username">Username</label>
-                    <InputText id="username" @bind-Value="UserModel.Username" DisplayName="Username" class="form-control" />
-                    <ValidationMessage For="@(() => UserModel.Username)" />
+                    <InputText id="username" @bind-Value="userModel.Username" DisplayName="Username" class="form-control" />
+                    <ValidationMessage For="@(() => userModel.Username)" />
                 </div>
                 <div class="form-group col">
                     <label for="email">Email</label>
-                    <InputText id="email" @bind-Value="UserModel.Email" class="form-control" />
-                    <ValidationMessage For="@(() => UserModel.Email)" />
+                    <InputText id="email" @bind-Value="userModel.Email" class="form-control" />
+                    <ValidationMessage For="@(() => userModel.Email)" />
                 </div>
             </div>
 
@@ -32,13 +32,13 @@
             <div class="form-group row">
                 <div class="form-group col">
                     <label for="password">Password</label>
-                    <InputText type="password" id="password" @bind-Value="UserModel.Password" class="form-control" />
-                    <ValidationMessage For="@(() => UserModel.Password)" />
+                    <InputText type="password" id="password" @bind-Value="userModel.Password" class="form-control" />
+                    <ValidationMessage For="@(() => userModel.Password)" />
                 </div>
                 <div class="form-group col">
                     <label for="passwordConfirm">Confirm Password</label>
-                    <InputText type="password" id="passwordConfirm" @bind-Value="UserModel.ConfirmPassword" class="form-control" />
-                    <ValidationMessage For="@(() => UserModel.ConfirmPassword)" />
+                    <InputText type="password" id="passwordConfirm" @bind-Value="userModel.ConfirmPassword" class="form-control" />
+                    <ValidationMessage For="@(() => userModel.ConfirmPassword)" />
                 </div>
             </div>
 
@@ -47,13 +47,13 @@
             <div class="form-group row">
                 <div class="form-group col">
                     <label for="firstName">First Name</label>
-                    <InputText id="firstName" @bind-Value="UserModel.FirstName" class="form-control" />
-                    <ValidationMessage For="@(() => UserModel.FirstName)" />
+                    <InputText id="firstName" @bind-Value="userModel.FirstName" class="form-control" />
+                    <ValidationMessage For="@(() => userModel.FirstName)" />
                 </div>
                 <div class="form-group col">
                     <label for="lastName">Last Name</label>
-                    <InputText id="lastName" @bind-Value="UserModel.LastName" class="form-control" />
-                    <ValidationMessage For="@(() => UserModel.LastName)" />
+                    <InputText id="lastName" @bind-Value="userModel.LastName" class="form-control" />
+                    <ValidationMessage For="@(() => userModel.LastName)" />
                 </div>
             </div>
 
@@ -62,8 +62,8 @@
             <div class="form-group row">
                 <div class="form-group col">
                     <label for="age">Age</label>
-                    <InputNumber id="age" @bind-Value="UserModel.Age" class="form-control" />
-                    <ValidationMessage For="@(() => UserModel.Age)" />
+                    <InputNumber id="age" @bind-Value="userModel.Age" class="form-control" />
+                    <ValidationMessage For="@(() => userModel.Age)" />
                 </div>
             </div>
 
@@ -72,13 +72,13 @@
             <div class="form-group row">
                 <div class="form-group col">
                     <label>Gender</label>
-                    <InputText id="gender" @bind-Value="UserModel.Gender" class="form-control" />
-                    <ValidationMessage For="@(() => UserModel.Gender)" />
+                    <InputText id="gender" @bind-Value="userModel.Gender" class="form-control" />
+                    <ValidationMessage For="@(() => userModel.Gender)" />
                 </div>
                 <div class="form-group col">
                     <label for="adress">Adress</label>
-                    <InputText id="adress" @bind-Value="UserModel.Adress" class="form-control" />
-                    <ValidationMessage For="@(() => UserModel.Adress)" />
+                    <InputText id="adress" @bind-Value="userModel.Adress" class="form-control" />
+                    <ValidationMessage For="@(() => userModel.Adress)" />
                 </div>
             </div>
 
@@ -100,19 +100,19 @@
 
 
 @code {
-    public UserModel UserModel { get; set; } = new();
-    public UserModel? LoggedInUser { get; set; }
-    public string ErrorMessage { get; set; }
+    private UserModel userModel { get; set; } = new();
+    private UserModel? loggedInUser { get; set; }
+    private string errorMessage { get; set; }
 
     public async Task Create()
     {
         try
         {
-            await userService.CreateUser(UserModel);
+            await userService.CreateUser(userModel);
         }
         catch (Exception)
         {
-            ErrorMessage = "User already exists.";
+            errorMessage = "User already exists.";
             return;
         }
         navigationManager.NavigateTo("/", true);

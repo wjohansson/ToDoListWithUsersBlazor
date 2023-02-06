@@ -12,20 +12,20 @@
     <div class="d-flex flex-column gap-4 w-50 p-4 rounded-3" style="background-color: rgb(200, 200, 200)">
         <h3 class="text-center">Login</h3>
 
-        <EditForm Model="@User" OnSubmit="@LoginUser">
+        <EditForm Model="@user" OnSubmit="@LoginUser">
             <DataAnnotationsValidator />
-            <p class="text-danger">@ErrorMessage</p>
+            <p class="text-danger">@errorMessage</p>
 
             <div class="form-group row">
                 <div class="form-group col">
                     <label for="username">Username</label>
-                    <InputText id="username" @bind-Value="User.Username" class="form-control" />
-                    <ValidationMessage For="@(() => User.Username)" />
+                    <InputText id="username" @bind-Value="user.Username" class="form-control" />
+                    <ValidationMessage For="@(() => user.Username)" />
                 </div>
                 <div class="form-group col">
                     <label for="password">Password</label>
-                    <InputText type="password" id="password" @bind-Value="User.Password" class="form-control" />
-                    <ValidationMessage For="@(() => User.Password)" />
+                    <InputText type="password" id="password" @bind-Value="user.Password" class="form-control" />
+                    <ValidationMessage For="@(() => user.Password)" />
                 </div>
             </div>
 
@@ -42,18 +42,18 @@
 </div>
 
 @code {
-    public UserModel? User { get; set; } = new();
-    public string ErrorMessage { get; set; } = "";
+    private UserModel? user { get; set; } = new();
+    private string errorMessage { get; set; } = "";
 
     public async Task LoginUser()
     {
         try
         {
-            User = await userService.Login(User);
+            user = await userService.Login(user);
         }
         catch (Exception)
         {
-            ErrorMessage = "Incorrect username or password, try again.";
+            errorMessage = "Incorrect username or password, try again.";
             return;
         }
 
@@ -62,6 +62,6 @@
 
     public void ConfirmPassword()
     {
-        User.ConfirmPassword = User.Password;
+        user.ConfirmPassword = user.Password;
     }
 }

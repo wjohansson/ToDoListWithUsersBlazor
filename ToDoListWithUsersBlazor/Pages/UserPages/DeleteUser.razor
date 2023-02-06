@@ -5,16 +5,16 @@
 @inject UserServiceUi userService;
 @inject NavigationManager navigationManager;
 
-@if (User != null)
+@if (user != null)
 {
-    <h3>Delete user '@User.Username'</h3>
+    <h3>Delete user '@user.Username'</h3>
 
-    <p class="text-danger">@ErrorMessage</p>
-    <EditForm Model="@User" OnSubmit="@Delete">
+    <p class="text-danger">@errorMessage</p>
+    <EditForm Model="@user" OnSubmit="@Delete">
         <div class="form-group row">
             <div class="form-group col">
                 <label for="delete">Type "DELETE" to delete user. This can not be undone</label>
-                <InputText id="delete" @bind-Value="ConfirmDelete" class="form-control" />
+                <InputText id="delete" @bind-Value="confirmDelete" class="form-control" />
             </div>
         </div>
 
@@ -30,19 +30,19 @@
 }
 
 @code {
-    public UserModel? User { get; set; } = new();
-    public string ErrorMessage { get; set; } = "";
-    public string ConfirmDelete { get; set; } = "";
+    private UserModel? user = new();
+    private string errorMessage = "";
+    private string confirmDelete = "";
 
     protected override async Task OnInitializedAsync()
     {
         try
         {
-            User = await userService.GetUser();
+            user = await userService.GetUser();
         }
         catch (Exception)
         {
-            User = null;
+            user = null;
         }
     }
 
@@ -50,18 +50,18 @@
     {
         try
         {
-            if (ConfirmDelete != "DELETE")
+            if (confirmDelete != "DELETE")
             {
-                ErrorMessage = "Incorrect input. Type 'DELETE' in the field below";
+                errorMessage = "Incorrect input. Type 'DELETE' in the field below";
                 return;
             }
 
-            await userService.DeleteUser(User);
+            await userService.DeleteUser(user);
 
         }
         catch (Exception)
         {
-            ErrorMessage = "Something went wrong with deleting the user.";
+            errorMessage = "Something went wrong with deleting the user.";
             return;
         }
         navigationManager.NavigateTo("/", true);

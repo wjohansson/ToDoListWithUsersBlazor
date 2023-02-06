@@ -34,10 +34,10 @@
 
                         <div class="text-white p-2 mx-2 border-5 rounded-3 task d-flex flex-column flex-wrap justify-content-between @((CheckOpacity(task)) ? "opacity-25" : "opacity-100")" style="min-height: 90px; width: 90%">
 
-                            @if ((!ConfirmEditTask && !ConfirmDeleteTask) || task.Id != TempTask.Id)
+                            @if ((!confirmEditTask && !confirmDeleteTask) || task.Id != tempTask.Id)
                             {
                                 <div class="d-flex w-100 gap-2">
-                                    @if (ExpandedTasks.Any(x => x == task.Id))
+                                    @if (expandedTasks.Any(x => x == task.Id))
                                     {
                                         <button @onpointerdown="@(() => ToggleExpandTask(task))" class="oi oi-chevron-bottom btn btn-light bg-transparent text-white border-0 align-self-center" style="height: 50px; width: 50px;"></button>
                                     }
@@ -60,7 +60,7 @@
                                 </div>
                                 <hr class="bg-warning" />
 
-                                @if (ExpandedTasks.Any(x => x == task.Id) && !ConfirmCreateSubTask)
+                                @if (expandedTasks.Any(x => x == task.Id) && !confirmCreateSubTask)
                                 {
                                     <div class="d-flex flex-column gap-2">
                                         <Virtualize Context="subTask" Items="@task?.SubTasks">
@@ -74,12 +74,12 @@
                                         </Virtualize>
                                     </div>
                                 }
-                                else if (ExpandedTasks.Any(x => x == task.Id) && ConfirmCreateSubTask)
+                                else if (expandedTasks.Any(x => x == task.Id) && confirmCreateSubTask)
                                 {
                                     <CreateSubTask Task="@task" OnSubTaskCreated="@(() => SubTaskCreated(task))"></CreateSubTask>
                                 }
                             }
-                            else if (task.Id == TempTask.Id && ConfirmDeleteTask)
+                            else if (task.Id == tempTask.Id && confirmDeleteTask)
                             {
                                 <div class="text-center mb-0">Are you sure?</div>
                                 <hr class="bg-black mx-2 my-1" />
@@ -88,9 +88,9 @@
                                     <button type="reset" @onclick="() => ToggleDelete(task)" @onclick:preventDefault class="btn btn-outline-danger oi oi-x" style="height: 30px; width: calc(50% - 4px)"></button>
                                 </div>
                             }
-                            else if (task.Id == TempTask.Id && ConfirmEditTask)
+                            else if (task.Id == tempTask.Id && confirmEditTask)
                             {
-                                <p class="text-danger">@EditErrorMessage</p>
+                                <p class="text-danger">@editErrorMessage</p>
                                 <EditForm Model="task" OnValidSubmit="() => Edit(task)">
                                     <DataAnnotationsValidator />
                                     <div class="form-group row">
@@ -135,7 +135,7 @@
                         <div class="d-flex flex-column gap-2">
                             <button @onclick="() => ToggleEdit(task)" class="btn btn-secondary oi oi-pencil" style="height: 40px; width: 40px"></button>
                             <button @onclick="() => ToggleDelete(task)" class="btn btn-outline-danger oi oi-trash" style="height: 40px; width: 40px"></button>
-                            @if (ExpandedTasks.Any(x => x == task.Id))
+                            @if (expandedTasks.Any(x => x == task.Id))
                             {
                                 <button @onclick="() => ToggleCreate(task)" class="btn btn-success oi oi-plus" style="height: 40px; width: 40px"></button>
                             }
@@ -173,97 +173,95 @@
     [Parameter]
     public UserModel User { get; set; }
 
-    public TaskModel TempTask { get; set; } = new()
+    private TaskModel tempTask { get; set; } = new()
         {
             Id = Guid.Empty
         };
-
-    public List<Guid> ExpandedTasks { get; set; } = new();
-
-    public string EditErrorMessage { get; set; } = "";
-    public bool ConfirmDeleteTask { get; set; } = false;
-    public bool ConfirmEditTask { get; set; } = false;
-    public bool ConfirmCreateSubTask { get; set; } = false;
-    public bool ExpandButton { get; set; } = false;
+    private List<Guid> expandedTasks { get; set; } = new();
+    private string editErrorMessage { get; set; } = "";
+    private bool confirmDeleteTask { get; set; } = false;
+    private bool confirmEditTask { get; set; } = false;
+    private bool confirmCreateSubTask { get; set; } = false;
+    private bool expandButton { get; set; } = false;
 
     public void ToggleDelete(TaskModel task)
     {
-        if (TempTask.Id != task.Id)
+        if (tempTask.Id != task.Id)
         {
-            TempTask.Id = task.Id;
-            ConfirmEditTask = false;
-            ConfirmDeleteTask = true;
-            ConfirmCreateSubTask = false;
+            tempTask.Id = task.Id;
+            confirmEditTask = false;
+            confirmDeleteTask = true;
+            confirmCreateSubTask = false;
             return;
         }
 
-        ConfirmDeleteTask = !ConfirmDeleteTask;
-        ConfirmEditTask = false;
-        ConfirmCreateSubTask = false;
-        TempTask.Id = task.Id;
+        confirmDeleteTask = !confirmDeleteTask;
+        confirmEditTask = false;
+        confirmCreateSubTask = false;
+        tempTask.Id = task.Id;
     }
 
     public void ToggleEdit(TaskModel task)
     {
-        if (!ConfirmEditTask)
+        if (!confirmEditTask)
         {
-            TempTask.Priority = task.Priority;
-            TempTask.Title = task.Title;
-            TempTask.Description = task.Description;
+            tempTask.Priority = task.Priority;
+            tempTask.Title = task.Title;
+            tempTask.Description = task.Description;
         }
-        else if (ConfirmEditTask && TempTask.Id == task.Id)
+        else if (confirmEditTask && tempTask.Id == task.Id)
         {
-            task.Priority = TempTask.Priority;
-            task.Title = TempTask.Title;
-            task.Description = TempTask.Description;
+            task.Priority = tempTask.Priority;
+            task.Title = tempTask.Title;
+            task.Description = tempTask.Description;
         }
 
-        if (TempTask.Id != task.Id)
+        if (tempTask.Id != task.Id)
         {
-            TempTask.Id = task.Id;
-            ConfirmDeleteTask = false;
-            ConfirmEditTask = true;
-            ConfirmCreateSubTask = false;
+            tempTask.Id = task.Id;
+            confirmDeleteTask = false;
+            confirmEditTask = true;
+            confirmCreateSubTask = false;
             return;
         }
 
-        ConfirmEditTask = !ConfirmEditTask;
-        ConfirmDeleteTask = false;
-        ConfirmCreateSubTask = false;
-        EditErrorMessage = "";
-        TempTask.Id = task.Id;
+        confirmEditTask = !confirmEditTask;
+        confirmDeleteTask = false;
+        confirmCreateSubTask = false;
+        editErrorMessage = "";
+        tempTask.Id = task.Id;
     }
 
     public void ToggleCreate(TaskModel task)
     {
-        if (TempTask.Id != task.Id)
+        if (tempTask.Id != task.Id)
         {
-            TempTask.Id = task.Id;
-            ConfirmEditTask = false;
-            ConfirmDeleteTask = false;
-            ConfirmCreateSubTask = true;
+            tempTask.Id = task.Id;
+            confirmEditTask = false;
+            confirmDeleteTask = false;
+            confirmCreateSubTask = true;
             return;
         }
 
-        ConfirmCreateSubTask = !ConfirmCreateSubTask;
-        ConfirmEditTask = false;
-        ConfirmDeleteTask = false;
-        TempTask.Id = task.Id;
+        confirmCreateSubTask = !confirmCreateSubTask;
+        confirmEditTask = false;
+        confirmDeleteTask = false;
+        tempTask.Id = task.Id;
     }
 
     public async void ToggleExpandTask(TaskModel task)
     {
-        if (ExpandedTasks.Any(x => x == task.Id))
+        if (expandedTasks.Any(x => x == task.Id))
         {
-            ExpandedTasks.Remove(task.Id);
+            expandedTasks.Remove(task.Id);
         }
         else
         {
             await taskService.GetTask(task.Id);
-            ExpandedTasks.Add(task.Id);
+            expandedTasks.Add(task.Id);
         }
 
-        ExpandButton = true;
+        expandButton = true;
         StateHasChanged();
     }
 
@@ -280,7 +278,7 @@
         {
             return false;
         }
-        else if (task.Completed && (task.Id == TempTask.Id && (ConfirmDeleteTask || ConfirmEditTask || ConfirmCreateSubTask)))
+        else if (task.Completed && (task.Id == tempTask.Id && (confirmDeleteTask || confirmEditTask || confirmCreateSubTask)))
         {
             return false;
         }
@@ -292,13 +290,13 @@
 
     public void GoToTask(TaskModel task)
     {
-        if ((ConfirmDeleteTask || ConfirmEditTask) && TempTask.Id == task.Id)
+        if ((confirmDeleteTask || confirmEditTask) && tempTask.Id == task.Id)
         {
             return;
         }
-        else if (ExpandButton)
+        else if (expandButton)
         {
-            ExpandButton = false;
+            expandButton = false;
             return;
         }
 
@@ -312,7 +310,7 @@
         {
             await taskService.DeleteTask(task);
             Tasks.Remove(task);
-            ConfirmDeleteTask = false;
+            confirmDeleteTask = false;
         }
         catch (Exception)
         {
@@ -326,19 +324,19 @@
         {
             await taskService.EditTask(task);
             Tasks = await taskService.GetTasks();
-            ConfirmEditTask = false;
-            EditErrorMessage = "";
+            confirmEditTask = false;
+            editErrorMessage = "";
         }
         catch (Exception)
         {
-            EditErrorMessage = "Task already exists with this name.";
+            editErrorMessage = "Task already exists with this name.";
             return;
         }
     }
 
     protected async Task SubTaskCreated(TaskModel task)
     {
-        ConfirmCreateSubTask = false;
+        confirmCreateSubTask = false;
         task.SubTasks = await subTaskService.GetSubTasks();
     }
 

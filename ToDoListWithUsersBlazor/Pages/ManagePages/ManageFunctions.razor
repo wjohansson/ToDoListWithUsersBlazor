@@ -17,7 +17,7 @@ else
     <h2>Your permission: @CurrentUser.Permission.Value</h2>
     <h3 class="text-decoration-underline mt-5">Users you manage:</h3>
 
-    <p class="text-danger">@ErrorMessage</p>
+    <p class="text-danger">@errorMessage</p>
     <table class="table">
         <thead>
             <tr>
@@ -35,7 +35,7 @@ else
             {
                 if (user.Permission < CurrentUser.Permission)
                 {
-                    if (ExpandUser && CurrentActive.Id["UserId"] == user.Id)
+                    if (expandUser && CurrentActive.Id["UserId"] == user.Id)
                     {
                         <tr @onclick="() => EditUser(user.Id)" class="bg-warning">
                             <td class="w-25">@user.Username</td>
@@ -50,20 +50,20 @@ else
                             <td>
                                 <div class="mb-5">
                                     <div class="position-absolute d-flex gap-2 w-75">
-                                        @if (!ConfirmDelete && !ConfirmPassword)
+                                        @if (!confirmDelete && !confirmPassword)
                                         {
                                             <button @onclick="@(() => Promote(user))" class="btn btn-outline-success oi oi-chevron-top  "><div class="font">Promote</div></button>
                                             <button @onclick="@(() => Demote(user))" class="btn btn-outline-warning oi oi-chevron-bottom"><div class="font">Demote</div></button>
                                             <button @onclick="@(() => ToggleConfirmDelete())" class="btn btn-danger oi oi-trash"><div class="font">Delete</div></button>
                                             <button @onclick="@(() => ToggleConfirmPassword())" class="btn btn-dark oi oi-lock-locked"><div class="font">Change Password</div></button>
                                         }
-                                        else if (ConfirmDelete)
+                                        else if (confirmDelete)
                                         {
                                             <p class="danger mb-0">Are you sure?</p>
                                             <button @onclick="@(() => Delete(user))" class="btn btn-success oi oi-check"></button>
                                             <button @onclick="@(() => ToggleConfirmDelete())" class="btn btn-danger oi oi-x"></button>
                                         }
-                                        else if (ConfirmPassword)
+                                        else if (confirmPassword)
                                         {
                                             <div class="w-100">
                                                 <ChangeOtherPassword User="@user" OnToggleConfirmPassword="@ToggleConfirmPassword"></ChangeOtherPassword>
@@ -134,13 +134,12 @@ else
 </style>
 
 @code {
-    public UserModel? CurrentUser { get; set; }
-    public List<UserModel>? Users { get; set; }
-    public bool ExpandUser { get; set; } = false;
-    public string ErrorMessage { get; set; } = "";
-    public string Focus { get; set; } = "";
-    public bool ConfirmDelete { get; set; } = false;
-    public bool ConfirmPassword { get; set; } = false;
+    private UserModel? CurrentUser;
+    private List<UserModel>? Users;
+    private bool expandUser = false;
+    private string errorMessage = "";
+    private bool confirmDelete  = false;
+    private bool confirmPassword = false;
 
     protected override async Task OnInitializedAsync()
     {
@@ -158,23 +157,23 @@ else
 
     public void EditUser(Guid id)
     {
-        if (ExpandUser == false)
+        if (expandUser == false)
         {
             CurrentActive.Id["UserId"] = id;
-            ExpandUser = !ExpandUser;
+            expandUser = !expandUser;
         }
-        else if (ExpandUser == true && CurrentActive.Id["UserId"] != id)
+        else if (expandUser == true && CurrentActive.Id["UserId"] != id)
         {
             CurrentActive.Id["UserId"] = id;
 
         }
         else
         {
-            ExpandUser = false;
+            expandUser = false;
         }
 
-        ConfirmDelete = false;
-        ConfirmPassword = false;
+        confirmDelete = false;
+        confirmPassword = false;
     }
 
     public async void Promote(UserModel user)
@@ -183,11 +182,11 @@ else
         {
             await userService.PromoteUser(user);
             Users = await userService.GetUsers();
-            ErrorMessage = "";
+            errorMessage = "";
         }
         catch (Exception)
         {
-            ErrorMessage = "Can not promote from Admin";
+            errorMessage = "Can not promote from Admin";
         }
 
         StateHasChanged();
@@ -202,7 +201,7 @@ else
         }
         catch (Exception)
         {
-            ErrorMessage = "Can not demote from User";
+            errorMessage = "Can not demote from User";
         }
 
         StateHasChanged();
@@ -210,12 +209,12 @@ else
 
     public async void ToggleConfirmDelete()
     {
-        ConfirmDelete = !ConfirmDelete;
+        confirmDelete = !confirmDelete;
     }
 
     public async void ToggleConfirmPassword()
     {
-        ConfirmPassword = !ConfirmPassword;
+        confirmPassword = !confirmPassword;
     }
 
     //public async void ChangeUserPassword(UserModel user)
@@ -232,7 +231,7 @@ else
         }
         catch (Exception)
         {
-            ErrorMessage = "Something went wrong with deleting the User";
+            errorMessage = "Something went wrong with deleting the User";
         }
 
         StateHasChanged();

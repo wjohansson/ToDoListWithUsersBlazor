@@ -6,25 +6,25 @@
 @inject UserServiceUi userService;
 @inject NavigationManager navigationManager;
 
-@if (User != null)
+@if (user != null)
 {
     <div class="d-flex w-100 justify-content-center">
         <div class="d-flex flex-column gap-4 w-50 p-4 rounded-3" style="background-color: rgb(200, 200, 200)">
-            <h3>Settings for '@User.Username'</h3>
+            <h3>Settings for '@user.Username'</h3>
 
-            <p class="text-danger">@ErrorMessage</p>
-            <EditForm Model="@User" OnSubmit="@Edit">
+            <p class="text-danger">@errorMessage</p>
+            <EditForm Model="@user" OnSubmit="@Edit">
                 <DataAnnotationsValidator />
                 <div class="form-group row">
                     <div class="form-group col">
                         <label for="username">Username</label>
-                        <InputText id="username" @bind-Value="User.Username" DisplayName="Username" class="form-control" />
-                        <ValidationMessage For="@(() => User.Username)" />
+                        <InputText id="username" @bind-Value="user.Username" DisplayName="Username" class="form-control" />
+                        <ValidationMessage For="@(() => user.Username)" />
                     </div>
                     <div class="form-group col">
                         <label for="email">Email</label>
-                        <InputText id="email" @bind-Value="User.Email" class="form-control" />
-                        <ValidationMessage For="@(() => User.Email)" />
+                        <InputText id="email" @bind-Value="user.Email" class="form-control" />
+                        <ValidationMessage For="@(() => user.Email)" />
                     </div>
                 </div>
 
@@ -33,13 +33,13 @@
                 <div class="form-group row">
                     <div class="form-group col">
                         <label for="firstName">First Name</label>
-                        <InputText id="firstName" @bind-Value="User.FirstName" class="form-control" />
-                        <ValidationMessage For="@(() => User.FirstName)" />
+                        <InputText id="firstName" @bind-Value="user.FirstName" class="form-control" />
+                        <ValidationMessage For="@(() => user.FirstName)" />
                     </div>
                     <div class="form-group col">
                         <label for="lastName">Last Name</label>
-                        <InputText id="lastName" @bind-Value="User.LastName" class="form-control" />
-                        <ValidationMessage For="@(() => User.LastName)" />
+                        <InputText id="lastName" @bind-Value="user.LastName" class="form-control" />
+                        <ValidationMessage For="@(() => user.LastName)" />
                     </div>
                 </div>
 
@@ -48,8 +48,8 @@
                 <div class="form-group row">
                     <div class="form-group col">
                         <label for="age">Age</label>
-                        <InputNumber id="age" @bind-Value="User.Age" class="form-control" />
-                        <ValidationMessage For="@(() => User.Age)" />
+                        <InputNumber id="age" @bind-Value="user.Age" class="form-control" />
+                        <ValidationMessage For="@(() => user.Age)" />
                     </div>
                 </div>
 
@@ -58,13 +58,13 @@
                 <div class="form-group row">
                     <div class="form-group col">
                         <label>Gender</label>
-                        <InputText id="gender" @bind-Value="User.Gender" class="form-control" />
-                        <ValidationMessage For="@(() => User.Gender)" />
+                        <InputText id="gender" @bind-Value="user.Gender" class="form-control" />
+                        <ValidationMessage For="@(() => user.Gender)" />
                     </div>
                     <div class="form-group col">
                         <label for="adress">Adress</label>
-                        <InputText id="adress" @bind-Value="User.Adress" class="form-control" />
-                        <ValidationMessage For="@(() => User.Adress)" />
+                        <InputText id="adress" @bind-Value="user.Adress" class="form-control" />
+                        <ValidationMessage For="@(() => user.Adress)" />
                     </div>
                 </div>
 
@@ -85,18 +85,18 @@
 }
 
 @code {
-    public UserModel? User { get; set; }
-    public string ErrorMessage { get; set; } = "";
+    private UserModel? user;
+    private string errorMessage = "";
 
     protected override async Task OnInitializedAsync()
     {
         try
         {
-            User = await userService.GetUser();
+            user = await userService.GetUser();
         }
         catch (Exception)
         {
-            User = null;
+            user = null;
         }
     }
 
@@ -104,18 +104,18 @@
     {
         try
         {
-            if (User.Permission == PermissionLevel.System)
+            if (user.Permission == PermissionLevel.System)
             {
-                ErrorMessage = "Can not change system user.";
+                errorMessage = "Can not change system user.";
                 return;
             }
 
-            User = await userService.EditUser(User);
+            user = await userService.EditUser(user);
 
         }
         catch (Exception)
         {
-            ErrorMessage = "Username already exists.";
+            errorMessage = "Username already exists.";
             return;
         }
         navigationManager.NavigateTo("/settings", true);

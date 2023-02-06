@@ -8,18 +8,18 @@
 @using ToDoListWithUsersBlazor.Services;
 @inject NavigationManager navigationManager
 
-<p class="text-danger">@ErrorMessage</p>
-<EditForm Model="@NewSubTask" OnValidSubmit="@Create">
+<p class="text-danger">@errorMessage</p>
+<EditForm Model="@newSubTask" OnValidSubmit="@Create">
     <DataAnnotationsValidator />
     <div class="form-group row">
         <div class="form-group col">
-            <InputText placeholder="Title..." id="title" @bind-Value="NewSubTask.Title" class="form-control" />
-            <ValidationMessage For="@(() => NewSubTask.Title)" />
+            <InputText placeholder="Title..." id="title" @bind-Value="newSubTask.Title" class="form-control" />
+            <ValidationMessage For="@(() => newSubTask.Title)" />
         </div>
 
         <div class="form-group col">
-            <InputText placeholder="Description..." id="description" @bind-Value="NewSubTask.Description" class="form-control" />
-            <ValidationMessage For="@(() => NewSubTask.Description)" />
+            <InputText placeholder="Description..." id="description" @bind-Value="newSubTask.Description" class="form-control" />
+            <ValidationMessage For="@(() => newSubTask.Description)" />
         </div>
     </div>
 
@@ -40,23 +40,23 @@
     [Parameter]
     public TaskModel Task { get; set; }
 
-    public SubTaskModel NewSubTask { get; set; } = new();
-    public string ErrorMessage { get; set; } = "";
+    private SubTaskModel newSubTask = new();
+    private string errorMessage = "";
 
 
     public async Task Create()
     {
         try
         {
-            NewSubTask.TaskId = Task.Id;
-            await subTaskService.CreateSubTask(NewSubTask);
+            newSubTask.TaskId = Task.Id;
+            await subTaskService.CreateSubTask(newSubTask);
         }
         catch (Exception)
         {
-            ErrorMessage = "Sub Task already exists in this task.";
+            errorMessage = "Sub Task already exists in this task.";
             return;
         }
-        NewSubTask = new();
+        newSubTask = new();
         await OnSubTaskCreated.InvokeAsync();
     }
 

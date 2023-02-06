@@ -21,7 +21,7 @@
                         <div class="d-flex flex-column w-50">
                             <div @onpointerdown="@(() => GetList(taskList))" class="p-2 m-2 border-5 bg-opacity-25 rounded-3 @(taskList.Id == CurrentActive.Id["ListId"] ? "activelist" : "list") list d-flex flex-column flex-wrap justify-content-between overflow-auto" style="height: 130px; scrollbar-width: none;">
                                 <div>
-                                    @if ((!ConfirmEditList && !ConfirmDeleteList) || taskList.Id != TempList.Id)
+                                    @if ((!confirmEditList && !confirmDeleteList) || taskList.Id != tempList.Id)
                                     {
                                         <div class="text-center mb-0">@taskList?.Title</div>
                                         <hr class="bg-black mx-2 my-1 @(taskList.Id == CurrentActive.Id["ListId"] ? "bg-white" : "bg-black")" />
@@ -38,16 +38,16 @@
                                             </Virtualize>
                                         </ul>
                                     }
-                                    else if (taskList.Id == TempList.Id && ConfirmDeleteList)
+                                    else if (taskList.Id == tempList.Id && confirmDeleteList)
                                     {
                                         <div class="text-center mb-0">Are you sure?</div>
                                         <hr class="bg-black mx-2 my-1" />
                                         <button @onclick="() => Delete(taskList)" class="btn btn-outline-success oi oi-check" style="height: 30px; width: calc(50% - 4px)"></button>
                                         <button type="reset" @onclick="() => ToggleDelete(taskList)" @onclick:preventDefault class="btn btn-outline-danger oi oi-x" style="height: 30px; width: calc(50% - 4px)"></button>
                                     }
-                                    else if (taskList.Id == TempList.Id && ConfirmEditList)
+                                    else if (taskList.Id == tempList.Id && confirmEditList)
                                     {
-                                        <p class="text-danger">@EditErrorMessage</p>
+                                        <p class="text-danger">@editErrorMessage</p>
                                         <EditForm Model="taskList" OnValidSubmit="() => Edit(taskList)">
                                             <DataAnnotationsValidator />
                                             <div class="form-group row">
@@ -59,7 +59,7 @@
 
                                                 <div class="form-group col">
                                                     <label for="category">Category</label>
-                                                    <InputSelect id="category" @bind-Value="taskList.CategoryId" @onpointerdown="@(() => _shouldRender = false)" class="form-control">
+                                                    <InputSelect id="category" @bind-Value="taskList.CategoryId" @onpointerdown="@(() => shouldRender = false)" class="form-control">
                                                         @if (User != null)
                                                         {
                                                             <option value="@User.Categories.First(x => x.Title == "No category").Id">No category</option>
@@ -149,70 +149,70 @@
     [Parameter]
     public EventCallback<TaskListModel> OnDeleteActiveList { get; set; }
 
-    public TaskListModel TempList { get; set; } = new();
-    public Guid CategoryId { get; set; }
-    public string EditErrorMessage { get; set; } = "";
-    public bool ConfirmDeleteList { get; set; } = false;
-    public bool ConfirmEditList { get; set; } = false;
-    private bool _shouldRender = true;
+    private TaskListModel tempList { get; set; } = new();
+    private Guid categoryId { get; set; }
+    private string editErrorMessage { get; set; } = "";
+    private bool confirmDeleteList { get; set; } = false;
+    private bool confirmEditList { get; set; } = false;
+    private bool shouldRender = true;
 
     protected override bool ShouldRender()
     {
-        return _shouldRender;
+        return shouldRender;
     }
 
     public void ToggleDelete(TaskListModel taskList)
     {
-        if (TempList.Id != taskList.Id)
+        if (tempList.Id != taskList.Id)
         {   
-            TempList.Id = taskList.Id;
-            ConfirmEditList = false;
-            ConfirmDeleteList = true;
+            tempList.Id = taskList.Id;
+            confirmEditList = false;
+            confirmDeleteList = true;
             return;
         }
 
-        TempList.Id = taskList.Id;
-        ConfirmDeleteList = !ConfirmDeleteList;
-        ConfirmEditList = false;
+        tempList.Id = taskList.Id;
+        confirmDeleteList = !confirmDeleteList;
+        confirmEditList = false;
     }
 
     public void ToggleEdit(TaskListModel taskList)
     {
-        _shouldRender = true;
+        shouldRender = true;
 
-        if (!ConfirmEditList)
+        if (!confirmEditList)
         {
-            TempList.CategoryId = taskList.CategoryId;
-            TempList.Title = taskList.Title;
+            tempList.CategoryId = taskList.CategoryId;
+            tempList.Title = taskList.Title;
         }
-        else if (ConfirmEditList && TempList.Id == taskList.Id)
+        else if (confirmEditList && tempList.Id == taskList.Id)
         {
-            taskList.CategoryId = TempList.CategoryId;
-            taskList.Title = TempList.Title;
+            taskList.CategoryId = tempList.CategoryId;
+            taskList.Title = tempList.Title;
         }
-        else if (ConfirmEditList && TempList.Id != taskList.Id)
+        else if (confirmEditList && tempList.Id != taskList.Id)
         {
-            TempList.CategoryId = taskList.CategoryId;
-            TempList.Title = taskList.Title;
+            tempList.CategoryId = taskList.CategoryId;
+            tempList.Title = taskList.Title;
         }
 
-        if (TempList.Id != taskList.Id)
+        if (tempList.Id != taskList.Id)
         {
-            TempList.Id = taskList.Id;
-            ConfirmDeleteList = false;
-            ConfirmEditList = true;
+            tempList.Id = taskList.Id;
+            confirmDeleteList = false;
+            confirmEditList = true;
             return;
         }
 
-        TempList.Id = taskList.Id;
-        ConfirmEditList = !ConfirmEditList;
-        ConfirmDeleteList = false;
-        EditErrorMessage = "";
+        tempList.Id = taskList.Id;
+        confirmEditList = !confirmEditList;
+        confirmDeleteList = false;
+        editErrorMessage = "";
     }
 
     public async void GetList(TaskListModel taskList)
     {
-        if ((ConfirmDeleteList || ConfirmEditList) && TempList.Id == taskList.Id)
+        if ((confirmDeleteList || confirmEditList) && tempList.Id == taskList.Id)
         {
             return;
         }
@@ -227,7 +227,7 @@
         {
             await listService.DeleteList(taskList);
             TaskLists.Remove(taskList);
-            ConfirmDeleteList = false;
+            confirmDeleteList = false;
 
             if (CurrentActive.Id["ListId"] == taskList.Id)
             {
@@ -245,18 +245,18 @@
         Guid? currentCategoryId = Guid.Empty;
         try
         {
-            _shouldRender = false;
+            shouldRender = false;
             await listService.EditList(taskList);
             TaskLists = await listService.GetLists();
-            ConfirmEditList = false;
-            EditErrorMessage = "";
-            _shouldRender = true;
+            confirmEditList = false;
+            editErrorMessage = "";
+            shouldRender = true;
         }
         catch (Exception)
         {
-            EditErrorMessage = "User already has a list with this name.";
-            taskList.CategoryId = TempList.CategoryId;
-            _shouldRender = true;
+            editErrorMessage = "User already has a list with this name.";
+            taskList.CategoryId = tempList.CategoryId;
+            shouldRender = true;
             return;
         }
     }
