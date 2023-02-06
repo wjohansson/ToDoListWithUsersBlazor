@@ -91,12 +91,13 @@
                             else if (task.Id == TempTask.Id && ConfirmEditTask)
                             {
                                 <p class="text-danger">@EditErrorMessage</p>
-                                <EditForm Model="task" OnSubmit="() => Edit(task)">
+                                <EditForm Model="task" OnValidSubmit="() => Edit(task)">
                                     <DataAnnotationsValidator />
                                     <div class="form-group row">
                                         <div class="form-group col">
                                             <label for="title">Title</label>
                                             <InputText placeholder="Title..." id="title" @bind-Value="task.Title" class="form-control" />
+                                            <ValidationMessage For="@(() => task.Title)" />
                                         </div>
 
                                         <div class="form-group col">
@@ -157,7 +158,6 @@
 
         .task:hover {
             background-color: rgb(50, 100, 100);
-            cursor: pointer;
         }
 
     li::marker {

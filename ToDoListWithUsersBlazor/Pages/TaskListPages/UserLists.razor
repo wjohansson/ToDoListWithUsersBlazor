@@ -48,12 +48,13 @@
                                     else if (taskList.Id == TempList.Id && ConfirmEditList)
                                     {
                                         <p class="text-danger">@EditErrorMessage</p>
-                                        <EditForm Model="taskList" OnSubmit="() => Edit(taskList)">
+                                        <EditForm Model="taskList" OnValidSubmit="() => Edit(taskList)">
                                             <DataAnnotationsValidator />
                                             <div class="form-group row">
                                                 <div class="form-group col">
                                                     <label for="title">Title</label>
                                                     <InputText id="title" @bind-Value="taskList.Title" class="form-control" />
+                                                    <ValidationMessage For="@(() => taskList.Title)" />
                                                 </div>
 
                                                 <div class="form-group col">
@@ -71,6 +72,7 @@
                                                             }
                                                         }
                                                     </InputSelect>
+                                                    <ValidationMessage For="@(() => taskList.CategoryId)" />
                                                 </div>
                                             </div>
 
@@ -187,6 +189,11 @@
         {
             taskList.CategoryId = TempList.CategoryId;
             taskList.Title = TempList.Title;
+        }
+        else if (ConfirmEditList && TempList.Id != taskList.Id)
+        {
+            TempList.CategoryId = taskList.CategoryId;
+            TempList.Title = taskList.Title;
         }
 
         if (TempList.Id != taskList.Id)
